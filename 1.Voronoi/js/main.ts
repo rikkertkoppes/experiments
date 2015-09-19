@@ -1,12 +1,7 @@
-///<reference path="voronoi.d.ts"/>
+///<reference path="Voronoi.d.ts"/>
+///<reference path="Network.ts"/>
 declare var paper: any;
-
-interface NNode {
-    site: Voronoi.Site;
-    neighbors: Voronoi.Site[];
-    halfedges: Voronoi.Halfedge[];
-    path?: any;
-}
+declare var network: Network.Network;
 
 function generatePoints(numPoints: number): number[] {
     var points = [];
@@ -31,63 +26,84 @@ function generateVoronoi(points: number[]): Voronoi.Result {
     return result;
 }
 
-function getOtherSite(site: Voronoi.Site) {
-    return function(halfedge: Voronoi.Halfedge): NNode {
-        var edge = halfedge.edge;
-        if (site === edge.rSite) {
-            return edge.lSite;
-        } else {
-            return edge.rSite;
-        }
-    }
+function generateNetwork(result: Voronoi.Result): Network.Network {
+    return new Network.Network(result.cells);
 }
 
-function generateNetwork(result: Voronoi.Result): NNode[] {
-    return result.cells.map(cell => ({
-        site: cell.site,
-        neighbors: cell.halfedges.map(getOtherSite(cell.site)),
-        halfedges: cell.halfedges
-    }));
-}
-
-function drawPoints(points: number[]): void {
-    points.forEach(point => {
-        var p = new paper.Path.Circle(point,0.5);
+function drawPoints(network: Network.Network): void {
+    network.neurons.forEach(neuron => {
+        var p = new paper.Path.Circle(neuron.getCenter(),0.5);
         p.fillColor = 'black';
     });
 }
 
-function drawCells(cells: NNode[]) {
-    console.log(cells);
-    cells.forEach(cell => {
-        var p = new paper.Path(cell.halfedges.map(_ => _.getStartpoint()));
+function drawCells(network: Network.Network): void {
+    network.neurons.forEach(neuron => {
+        var p = new paper.Path(neuron.getPath());
         p.fillColor = 'white';
-        p.cell = cell;
-        p.cell.path = p;
+        p.strokeColor = 'silver';
+        neuron.path = p;
+        p.neuron = neuron;
     });
 }
 
 function drawEdges(edges: Voronoi.Edge[]) {
     edges.forEach(edge => {
         var l = new paper.Path.Line(edge.va, edge.vb);
-        l.strokeColor = 'black';
+        l.strokeColor = 'silver';
     });
 }
 
-function flash(node: NNode) {
-    var p = node.path;
-    p.fillColor = 'red';
-    setTimeout(function() {
-        p.fillColor = 'white';
-        node.neighbors.forEach(flash);
-    },500);
+function createColor(activity: number): string {
+    return 'rgba('+[
+        255,
+        255 * (1 - activity),
+        255 * (1 - activity),
+        1
+    ].join(',')+')';
 }
+
+function startTick(network: Network.Network, delay=50, falloff = 0.2) {
+    function tick() {
+        network.neurons.forEach(function(neuron) {
+            var color = createColor(neuron.activity);
+            // console.log(color);
+            neuron.path.fillColor = color;
+        });
+        network.neurons.forEach(function(neuron) {
+            if (neuron.activity > 0) {
+                neuron.neighbors.forEach(function(neighbor) {
+                    var activity = neuron.activity - falloff;
+                    setTimeout(function() {
+                        neighbor.activity = activity;
+                    }, delay);
+                })
+            }
+        });
+        paper.view.draw();
+        requestAnimationFrame(tick);
+    }
+    tick();
+}
+
 
 function initMouse() {
     var tool = new paper.Tool();
     tool.onMouseDown = function(event) {
-        event.item.fillColor = 'red';
-        console.log(event.item.cell);
+        if (event.item.neuron) {
+            fire(event.item.neuron);
+        }
+    }
+}
+
+function fire(neuron: Network.Neuron) {
+    neuron.activity = 1;
+}
+
+function fireRandom(numberOfCells = 0) {
+    while (numberOfCells--) {
+        var i = Math.floor(network.neurons.length * Math.random());
+        fire(network.neurons[i]);
     }
 }
 
@@ -99,15 +115,19 @@ function init(): void {
 
     var points = generatePoints(200);
     var result = generateVoronoi(points);
-    var network = generateNetwork(result);
+    network = generateNetwork(result);
+
+    console.log(result);
     console.log(network);
-    drawPoints(points);
+
     drawCells(network);
+    drawPoints(network);
     // drawEdges(result.edges);
     initMouse();
 
     // Draw the view now:
     paper.view.draw();
+    startTick(network,50);
 }
 
 init();

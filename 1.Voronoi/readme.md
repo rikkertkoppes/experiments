@@ -2,6 +2,7 @@ Experiment 1: Voronoi
 ===========
 
 Goal:
+-----
 
 - Randomly seed a rectangle with cells
 - calculate nearest neughbors using voronoi
@@ -9,7 +10,15 @@ Goal:
 - visualize the network
 - allow propagation of signals
 
+Observations
+--------
+
+- non-regular network results in interesting behaviour. Bits of activity pop up in unexpected places
+- firing from multiple spots sometimes leads to lingering activity in the middle
+- every activity dies off after some time
+
 Sources
+------
 
 Voronoi
 

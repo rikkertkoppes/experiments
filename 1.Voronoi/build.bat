@@ -1,0 +1,1 @@
+tsc js\main.ts -w --out js\main.js --sourceMap
