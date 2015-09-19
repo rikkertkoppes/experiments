@@ -32,7 +32,7 @@ function generateNetwork(result: Voronoi.Result): Network.Network {
 
 function drawPoints(network: Network.Network): void {
     network.neurons.forEach(neuron => {
-        var p = new paper.Path.Circle(neuron.getCenter(),0.5);
+        var p = new paper.Path.Circle(neuron.getCenter(), 0.5);
         p.fillColor = 'black';
     });
 }
@@ -55,15 +55,15 @@ function drawEdges(edges: Voronoi.Edge[]) {
 }
 
 function createColor(activity: number): string {
-    return 'rgba('+[
+    return 'rgba(' + [
         255,
         255 * (1 - activity),
         255 * (1 - activity),
         1
-    ].join(',')+')';
+    ].join(',') + ')';
 }
 
-function startTick(network: Network.Network, delay=50, falloff = 0.2) {
+function startTick(network: Network.Network, delay = 50, falloff = 0.2) {
     function tick() {
         network.neurons.forEach(function(neuron) {
             var color = createColor(neuron.activity);
@@ -127,7 +127,7 @@ function init(): void {
 
     // Draw the view now:
     paper.view.draw();
-    startTick(network,50);
+    startTick(network, 50);
 }
 
 init();

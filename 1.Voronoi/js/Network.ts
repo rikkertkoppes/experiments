@@ -1,4 +1,5 @@
 ///<reference path="Voronoi.d.ts"/>
+///<reference path="Neuron.ts"/>
 module Network {
     function getOtherSite(site: Voronoi.Site) {
         return function(halfedge: Voronoi.Halfedge): Voronoi.Site {
@@ -17,7 +18,7 @@ module Network {
             this.neurons = this.generate(cells);
             this.link(this.neurons);
         };
-        generate(cells: Voronoi.Cell[]):Neuron[] {
+        generate(cells: Voronoi.Cell[]): Neuron[] {
             return cells.map(function(cell) {
                 var n = new Neuron(cell);
                 return n;
@@ -34,32 +35,12 @@ module Network {
                         } else {
                             return sites;
                         }
-                    },[])
+                    }, [])
                     .map(site => {
                         return neurons[site.voronoiId]
                     })
                 );
             });
-        }
-    }
-
-    export class Neuron {
-        cell: Voronoi.Cell;
-        neighbors: Neuron[];
-        path: any;
-        activity: number;
-        constructor(cell: Voronoi.Cell) {
-            this.activity = 0;
-            this.cell = cell;
-        };
-        setNeighbors(neighbors:Neuron[]) {
-            this.neighbors = neighbors;
-        };
-        getCenter(): Voronoi.Site {
-            return this.cell.site;
-        };
-        getPath(): Voronoi.Vertex[] {
-            return this.cell.halfedges.map(_ => _.getStartpoint());
         }
     }
 }

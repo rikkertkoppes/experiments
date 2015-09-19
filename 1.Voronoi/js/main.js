@@ -1,5 +1,30 @@
 ///<reference path="Voronoi.d.ts"/>
 var Network;
+(function (Network) {
+    var Neuron = (function () {
+        function Neuron(cell) {
+            this.activity = 0;
+            this.cell = cell;
+        }
+        ;
+        Neuron.prototype.setNeighbors = function (neighbors) {
+            this.neighbors = neighbors;
+        };
+        ;
+        Neuron.prototype.getCenter = function () {
+            return this.cell.site;
+        };
+        ;
+        Neuron.prototype.getPath = function () {
+            return this.cell.halfedges.map(function (_) { return _.getStartpoint(); });
+        };
+        return Neuron;
+    })();
+    Network.Neuron = Neuron;
+})(Network || (Network = {}));
+///<reference path="Voronoi.d.ts"/>
+///<reference path="Neuron.ts"/>
+var Network;
 (function (Network_1) {
     function getOtherSite(site) {
         return function (halfedge) {
@@ -20,7 +45,7 @@ var Network;
         ;
         Network.prototype.generate = function (cells) {
             return cells.map(function (cell) {
-                var n = new Neuron(cell);
+                var n = new Network_1.Neuron(cell);
                 return n;
             });
         };
@@ -46,26 +71,6 @@ var Network;
         return Network;
     })();
     Network_1.Network = Network;
-    var Neuron = (function () {
-        function Neuron(cell) {
-            this.activity = 0;
-            this.cell = cell;
-        }
-        ;
-        Neuron.prototype.setNeighbors = function (neighbors) {
-            this.neighbors = neighbors;
-        };
-        ;
-        Neuron.prototype.getCenter = function () {
-            return this.cell.site;
-        };
-        ;
-        Neuron.prototype.getPath = function () {
-            return this.cell.halfedges.map(function (_) { return _.getStartpoint(); });
-        };
-        return Neuron;
-    })();
-    Network_1.Neuron = Neuron;
 })(Network || (Network = {}));
 ///<reference path="Voronoi.d.ts"/>
 ///<reference path="Network.ts"/>
