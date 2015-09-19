@@ -37,14 +37,26 @@ var Network;
             }
         };
     }
+    function generateVoronoi(points) {
+        var sites = points.map(function (point) { return ({
+            x: point[0],
+            y: point[1]
+        }); });
+        var voronoi = new Voronoi();
+        var bbox = { xl: 0, xr: 400, yt: 0, yb: 400 };
+        var result = voronoi.compute(sites, bbox);
+        console.log(result.execTime);
+        return result;
+    }
     var Network = (function () {
-        function Network(cells) {
-            this.neurons = this.generate(cells);
+        function Network(points) {
+            this.voronoi = generateVoronoi(points);
+            this.neurons = this.generate(this.voronoi);
             this.link(this.neurons);
         }
         ;
-        Network.prototype.generate = function (cells) {
-            return cells.map(function (cell) {
+        Network.prototype.generate = function (voronoi) {
+            return voronoi.cells.map(function (cell) {
                 var n = new Network_1.Neuron(cell);
                 return n;
             });
@@ -72,7 +84,6 @@ var Network;
     })();
     Network_1.Network = Network;
 })(Network || (Network = {}));
-///<reference path="Voronoi.d.ts"/>
 ///<reference path="Network.ts"/>
 function generatePoints(numPoints) {
     var points = [];
@@ -84,19 +95,8 @@ function generatePoints(numPoints) {
     }
     return points;
 }
-function generateVoronoi(points) {
-    var sites = points.map(function (point) { return ({
-        x: point[0],
-        y: point[1]
-    }); });
-    var voronoi = new Voronoi();
-    var bbox = { xl: 0, xr: 400, yt: 0, yb: 400 };
-    var result = voronoi.compute(sites, bbox);
-    console.log(result.execTime);
-    return result;
-}
-function generateNetwork(result) {
-    return new Network.Network(result.cells);
+function generateNetwork(points) {
+    return new Network.Network(points);
 }
 function drawPoints(network) {
     network.neurons.forEach(function (neuron) {
@@ -108,13 +108,13 @@ function drawCells(network) {
     network.neurons.forEach(function (neuron) {
         var p = new paper.Path(neuron.getPath());
         p.fillColor = 'white';
-        p.strokeColor = 'silver';
+        // p.strokeColor = 'silver';
         neuron.path = p;
         p.neuron = neuron;
     });
 }
-function drawEdges(edges) {
-    edges.forEach(function (edge) {
+function drawEdges(network) {
+    network.voronoi.edges.forEach(function (edge) {
         var l = new paper.Path.Line(edge.va, edge.vb);
         l.strokeColor = 'silver';
     });
@@ -175,13 +175,11 @@ function init() {
     // Create an empty project and a view for the canvas:
     paper.setup(canvas);
     var points = generatePoints(200);
-    var result = generateVoronoi(points);
-    network = generateNetwork(result);
-    console.log(result);
+    network = generateNetwork(points);
     console.log(network);
     drawCells(network);
     drawPoints(network);
-    // drawEdges(result.edges);
+    drawEdges(network);
     initMouse();
     // Draw the view now:
     paper.view.draw();

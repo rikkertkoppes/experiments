@@ -12,14 +12,28 @@ module Network {
         }
     }
 
+    function generateVoronoi(points: number[]): Voronoi.Result {
+        var sites = points.map(point => ({
+            x: point[0],
+            y: point[1]
+        }));
+        var voronoi = new Voronoi();
+        var bbox = { xl: 0, xr: 400, yt: 0, yb: 400 };
+        var result = voronoi.compute(sites, bbox);
+        console.log(result.execTime);
+        return result;
+    }
+
     export class Network {
         neurons: Neuron[];
-        constructor(cells: Voronoi.Cell[]) {
-            this.neurons = this.generate(cells);
+        voronoi: Voronoi.Result;
+        constructor(points: number[]) {
+            this.voronoi = generateVoronoi(points);
+            this.neurons = this.generate(this.voronoi);
             this.link(this.neurons);
         };
-        generate(cells: Voronoi.Cell[]): Neuron[] {
-            return cells.map(function(cell) {
+        generate(voronoi: Voronoi.Result): Neuron[] {
+            return voronoi.cells.map(function(cell) {
                 var n = new Neuron(cell);
                 return n;
             });

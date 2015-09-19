@@ -1,4 +1,3 @@
-///<reference path="Voronoi.d.ts"/>
 ///<reference path="Network.ts"/>
 declare var paper: any;
 declare var network: Network.Network;
@@ -14,20 +13,8 @@ function generatePoints(numPoints: number): number[] {
     return points;
 }
 
-function generateVoronoi(points: number[]): Voronoi.Result {
-    var sites = points.map(point => ({
-        x: point[0],
-        y: point[1]
-    }));
-    var voronoi = new Voronoi();
-    var bbox = { xl: 0, xr: 400, yt: 0, yb: 400 };
-    var result = voronoi.compute(sites, bbox);
-    console.log(result.execTime);
-    return result;
-}
-
-function generateNetwork(result: Voronoi.Result): Network.Network {
-    return new Network.Network(result.cells);
+function generateNetwork(points: number[]): Network.Network {
+    return new Network.Network(points);
 }
 
 function drawPoints(network: Network.Network): void {
@@ -41,14 +28,14 @@ function drawCells(network: Network.Network): void {
     network.neurons.forEach(neuron => {
         var p = new paper.Path(neuron.getPath());
         p.fillColor = 'white';
-        p.strokeColor = 'silver';
+        // p.strokeColor = 'silver';
         neuron.path = p;
         p.neuron = neuron;
     });
 }
 
-function drawEdges(edges: Voronoi.Edge[]) {
-    edges.forEach(edge => {
+function drawEdges(network: Network.Network) {
+    network.voronoi.edges.forEach(edge => {
         var l = new paper.Path.Line(edge.va, edge.vb);
         l.strokeColor = 'silver';
     });
@@ -114,15 +101,13 @@ function init(): void {
     paper.setup(canvas);
 
     var points = generatePoints(200);
-    var result = generateVoronoi(points);
-    network = generateNetwork(result);
+    network = generateNetwork(points);
 
-    console.log(result);
     console.log(network);
 
     drawCells(network);
     drawPoints(network);
-    // drawEdges(result.edges);
+    drawEdges(network);
     initMouse();
 
     // Draw the view now:
