@@ -16,6 +16,9 @@ Observations
 - non-regular network results in interesting behaviour. Bits of activity pop up in unexpected places
 - firing from multiple spots sometimes leads to lingering activity in the middle
 - every activity dies off after some time
+- network propagation is best done by internal reflection: every cell should look at its neighbors to determine its own state (like a cellular automaton), rather than dictating its neighbors
+- need a diffusion / wave propagation CA 
+- every fire adds energy to the system, need dissipation
 
 Sources
 ------

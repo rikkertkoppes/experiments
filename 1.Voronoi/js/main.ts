@@ -13,6 +13,20 @@ function generatePoints(numPoints: number): number[] {
     return points;
 }
 
+function generateRegular(numPoints: number):number[] {
+    var points = [];
+    var i,j,side = Math.floor(Math.sqrt(numPoints));
+    for (i=0; i<side; i++) {
+        for (j=0; j<side; j++) {
+            points.push([
+                0.5 + Math.round((i+0.5)*400/side),
+                0.5 + Math.round((j+0.5)*400/side)
+            ])
+        }
+    }
+    return points;
+}
+
 function generateNetwork(points: number[]): Network.Network {
     return new Network.Network(points);
 }
@@ -28,7 +42,7 @@ function drawCells(network: Network.Network): void {
     network.neurons.forEach(neuron => {
         var p = new paper.Path(neuron.getPath());
         p.fillColor = 'white';
-        // p.strokeColor = 'silver';
+        p.strokeColor = 'silver';
         neuron.path = p;
         p.neuron = neuron;
     });
@@ -57,18 +71,10 @@ function startTick(network: Network.Network, delay = 50, falloff = 0.2) {
             // console.log(color);
             neuron.path.fillColor = color;
         });
-        network.neurons.forEach(function(neuron) {
-            if (neuron.activity > 0) {
-                neuron.neighbors.forEach(function(neighbor) {
-                    var activity = neuron.activity - falloff;
-                    setTimeout(function() {
-                        neighbor.activity = activity;
-                    }, delay);
-                })
-            }
-        });
+        network.propagate(delay,falloff);
         paper.view.draw();
-        requestAnimationFrame(tick);
+        // requestAnimationFrame(tick);
+        setTimeout(tick,delay);
     }
     tick();
 }
@@ -78,19 +84,15 @@ function initMouse() {
     var tool = new paper.Tool();
     tool.onMouseDown = function(event) {
         if (event.item.neuron) {
-            fire(event.item.neuron);
+            event.item.neuron.fire();
         }
     }
-}
-
-function fire(neuron: Network.Neuron) {
-    neuron.activity = 1;
 }
 
 function fireRandom(numberOfCells = 0) {
     while (numberOfCells--) {
         var i = Math.floor(network.neurons.length * Math.random());
-        fire(network.neurons[i]);
+        network.neurons[i].fire();
     }
 }
 
@@ -101,18 +103,19 @@ function init(): void {
     paper.setup(canvas);
 
     var points = generatePoints(200);
+    // var points = generateRegular(200);
     network = generateNetwork(points);
 
     console.log(network);
 
     drawCells(network);
     drawPoints(network);
-    drawEdges(network);
+    // drawEdges(network);
     initMouse();
 
     // Draw the view now:
     paper.view.draw();
-    startTick(network, 50);
+    startTick(network,200);
 }
 
 init();

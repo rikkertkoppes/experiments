@@ -55,6 +55,34 @@ module Network {
                     })
                 );
             });
+        };
+
+        propagate(delay = 50, falloff = 0.2) {
+            //calculate new state
+            this.neurons.forEach(function(neuron) {
+                //neighbors and itself
+                var range = neuron.neighbors.concat(neuron);
+                var range = neuron.neighbors;
+                //average of the range -> need dissipation here
+                var activity = range.reduce(function(activity,cell) {
+                    return activity + (cell.activity / range.length)
+                },0);
+                // var activity = Math.min(1,neuron.neighbors.reduce(function(activity, neighbor) {
+                //     return activity + Math.max(0,neighbor.activity - falloff);
+                //     // return Math.min(1, Math.max(activity, neighbor.activity - falloff));
+                // }, neuron.activity - falloff));
+                // console.log(activity);
+                neuron.nextActivity = activity;
+                // setTimeout(function() {
+                //     neuron.activity = activity;
+                // }, 0);
+            });
+            //set new state
+            setTimeout(() => {
+                this.neurons.forEach(function(neuron) {
+                    neuron.activity = neuron.nextActivity;
+                })
+            },0);
         }
     }
 }

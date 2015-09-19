@@ -5,6 +5,7 @@ module Network {
         neighbors: Neuron[];
         path: any;
         activity: number;
+        nextActivity: number;
         constructor(cell: Voronoi.Cell) {
             this.activity = 0;
             this.cell = cell;
@@ -17,6 +18,9 @@ module Network {
         };
         getPath(): Voronoi.Vertex[] {
             return this.cell.halfedges.map(_ => _.getStartpoint());
+        };
+        fire(activity = 1): void {
+            this.activity = activity;
         }
     }
 }
