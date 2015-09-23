@@ -19,6 +19,7 @@ In CRUM we have
 - images
 - logic
 - concepts
+
 ---------------
 
 Here is where experience comes into play. An infant does not know how to solve problems, so it copies observed behaviour (mirror neurons), or tries random things (random firing? - what is the system here?)
@@ -36,15 +37,42 @@ Communication between parts does not need to follow rules of nature (a spike of 
 
 When Wolfram ImageIdentify identifies an image, it can just report the results. We can use that as input to an association engine (e.g. into dbpedia)
 
+Output is also covered quite a bit. Outputting to a console is trivial, natural language output is somewhat more involved, but text to speech for example is quite covered. Also moving actuators is not something we need to learn.
+
+Linking to Kurzweils's talks, the bit that is missing is the neocortex function (learning). We can already recreate basic animal like behaviour (e.g. big dog). All behaviour is basically hardcoded (and defined by evolution).
+
+Watson also provides [concept insights](http://concept-insights-demo.mybluemix.net/) and [concept expansion](http://concept-expansion-demo.mybluemix.net/) and 
+
+Also, [Watson's Alchemy](http://www.alchemyapi.com/products/demo/alchemylanguage) can extract concepts (linking to dbpedia) and relations from text
+
 Problem solving
 ============
 
 Can problem solving be classified?
 
-- navigation (from a state to a goal, using given actions constrained by the world)
+This link (http://www.1000ventures.com/business_guide/crosscuttings/problems_4types.html) defines 4 types of problems:
+
+Four Types of Problems
+----------
+
+1. Known, solution requires just action.
+2. Known, solution requires additional expertise. Can be solved by vertical and systematic thinking.
+3. Known, solution requires new approaches, reframing, and creative thinking. Requires no new information but reframing or rearrangement of information already available: an insight restructuring.
+4. Unknown, need to be identified. The problem is to realize that there is a problem, that things can be improved and define this realization as a problem. Dealing with this type of hidden problems requires challenging assumptions, asking “Why?” and “What if?” questions, benchmarking, and cross-pollination of ideas.
+
+Own ideas
+------
+
+- navigation (from a state to a goal, using given actions constrained by the world) (logic reasoning)
 - simplification / symbolic substitution reasoning (all of math)
 
+
 How can a problem be stated?
+
+Patterns in problem solving
+---------
+
+Do we recognize patterns in problems? If a pattern matches for parts, is that the way we infer a particular problem is similar to another? And if so, apply the same solution? Is this how analogies work (if it matches 100%, it is a rule)?
 
 General intelligence
 ==============
@@ -82,8 +110,25 @@ We may need to add a few things to RDF
 - local storage
 - network activation spreading
 
-There is already quite a bit of network built: https://en.wikipedia.org/wiki/Semantic_network One such example is wordnet (https://en.wikipedia.org/wiki/WordNet) another is dbpedia (http://dbpedia.org/)
+There is already quite a bit of network built: https://en.wikipedia.org/wiki/Semantic_network One such example is wordnet (https://en.wikipedia.org/wiki/WordNet) another is dbpedia (http://dbpedia.org/). Brining in these association networks already fills in a bit of the experience mentioned in the beginning.
+
+Also:
+
+- dbpedia
+- freebase
+- yago
 
 This is a nice idea in clojure: http://www.ericrochester.com/pages/code/aggregating-semantic-web-data/
 
-Can we use this in problem solving? 
+Can we use this in problem solving?
+
+Mind as data
+============
+
+In clojure, people often talk about " * as data". Where * can be anything (from an [ide](http://www.chris-granger.com/2013/01/24/the-ide-as-data/) to the language itself)
+
+Can we implement the mind as data?
+
+Also read http://www.chris-granger.com/2012/12/11/anatomy-of-a-knockout/
+
+Is the mind just a game? Cellular automata is basically a game and can be seen as data (and implemented using CES)
