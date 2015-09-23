@@ -1,0 +1,14 @@
+{
+  "name": "dbpedia",
+  "version": "1.0.0",
+  "description": "gets dbpedia link info for a particular text, using dbpedia spotlight",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dbpedia-spotlight": "^0.5.27"
+  }
+}
