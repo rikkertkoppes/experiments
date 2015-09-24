@@ -7,22 +7,26 @@ Observations: defined symbols for decimal numbers, they can be any base and any 
 
 Next step may be to even omit the declaration of symbols and deriver everything from rules
 
-rules for next in decimal (don;t even need the symbols)
+rules for next in decimal (don't even need the symbols)
 
-n(~0) = ~1
-n(~1) = ~2
-n(~2) = ~3
-n(~3) = ~4
-n(~4) = ~5
-n(~5) = ~6
-n(~6) = ~7
-n(~7) = ~8
-n(~8) = ~9
-n(~9) = n(~)0
+	n(~0) = ~1
+	n(~1) = ~2
+	n(~2) = ~3
+	n(~3) = ~4
+	n(~4) = ~5
+	n(~5) = ~6
+	n(~6) = ~7
+	n(~7) = ~8
+	n(~8) = ~9
+	n(~9) = n(~)0
 
-then there is a rule, next-of 9 is rolling over to 10. etc. This can be caught with core.logic
+prev rules are similar, but reversed, also, we need an extra for N, since no negatives
 
-is-prev-of is the reverse of this
+	p(0) = NaN
+	p(~0) = p(~)9
+	p(~1) = p(~0)
+
+how to remove leading zero's?
 
 adding is looping through next operations, multplying is looping through adding etc
 
