@@ -5,6 +5,8 @@ Goal: build up basic math from the principle of counting
 
 Observations: defined symbols for decimal numbers, they can be any base and any symbol and it works fine
 
+Next
+-----
 Next step may be to even omit the declaration of symbols and deriver everything from rules
 
 rules for next in decimal (don't even need the symbols)

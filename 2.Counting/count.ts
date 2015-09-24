@@ -1,5 +1,6 @@
 //innate knowledge of order
 var symbols = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+var symbols = ['0', '1', '2', '3', '4', '5', 'B'];
 
 //numbers are arrays of symbols
 //for writing there is a write function that simply joins them
@@ -39,7 +40,7 @@ function prev(nr: string[]): string[] {
     if (isFirst(head)) {
         head = [];
     }
-    return head.concat(symbols[9]);
+    return head.concat(symbols[symbols.length-1]);
 }
 
 //4+2 -> 5+1 -> 6+0 -> 6
@@ -108,7 +109,6 @@ function write(symbols: string[]): string {
 }
 
 console.log(write(prev(['0'])));
-console.log(write(prev(['9'])));
 console.log(write(prev(['1', '0'])));
 console.log(write(prev(['1', '0', '0'])));
 
