@@ -24,16 +24,15 @@ function next(nr: string[]): string[] {
 }
 
 function prev(nr: string[]): string[] {
+    if (isFirst(nr)) {
+        return ['NaN'];
+    }
     nr = copy(nr);
     var last = nr.pop() || symbols[0];
     // console.log('',last);
     var prevIndex = symbols.indexOf(last) - 1;
     if (prevIndex > -1) {
         return [].concat(nr, symbols[prevIndex]);
-    }
-    if (nr.length === 0) {
-        //no symbols left, we reached zero
-        return ['NaN'];
     }
     var head = prev(nr);
     //remove leading zeros
