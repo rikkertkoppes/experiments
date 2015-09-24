@@ -58,8 +58,39 @@ function mult(base, plier, start) {
     }
     return mult(base, prev(plier), add(start, base));
 }
-function div() {
-    //implement tail division
+//less than
+function lt(a, b) {
+    //hack
+    return parseInt(write(a), 10) < parseInt(write(b), 10);
+    a = copy(a);
+    b = copy(b);
+    if (a.length == b.length) {
+        var la = symbols.indexOf(a.shift());
+        var lb = symbols.indexOf(b.shift());
+        if (la == lb) {
+            if (la == undefined) {
+                //both the same
+                return false;
+            }
+            return lt(a, b);
+        }
+        //first symbol smaller
+        return (la < lb);
+    }
+    //true if a shorter
+    return (a.length < b.length);
+}
+function div(n, d, res) {
+    if (res === void 0) { res = ['0']; }
+    //subtract n from d until no longer can
+    if (isFirst(d)) {
+        //division by zero
+        return ['NaN'];
+    }
+    if (lt(n, d)) {
+        return res;
+    }
+    return div(sub(n, d), d, next(res));
 }
 function write(symbols) {
     return symbols.join('');
@@ -71,7 +102,7 @@ console.log(write(prev(['1', '0', '0'])));
 var count = 20;
 var current = ['0'];
 while (count--) {
-    console.log(write(current), write(add(['4'], current)), write(mult(['3'], current)));
+    console.log(write(current), write(add(['4'], current)), write(mult(['3'], current)), write(div(current, ['2'])));
     current = next(current);
 }
 ;
