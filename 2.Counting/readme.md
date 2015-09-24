@@ -28,7 +28,13 @@ prev rules are similar, but reversed, also, we need an extra for N, since no neg
 	p(~0) => p(~)9
 	p(~1) => p(~0)
 
-how to remove leading zero's?
+how to remove leading zero's? -> by defining a special rule to decrement 10:
+
+	p(10) => 9
+
+Or a rule that explicitly removes zeros (which is probably better, or just have both):
+
+	0~ => ~
 
 Also adding may me caught in rules
 
@@ -66,3 +72,7 @@ like
 This would still allow all calculations, but speed up "known" calculations.
 
 Note that rules need to have an order here
+
+Also, the predicates (=>) is just one example here. Rules need not be bound to only this predicate
+
+The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the while group of predicates.
