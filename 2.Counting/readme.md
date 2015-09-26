@@ -1,11 +1,11 @@
-Counting (positive integer math)
+Counting (count.ts - positive integer math)
 ==========
 
 Goal: build up basic math from the principle of counting
 
 Observations: defined symbols for decimal numbers, they can be any base and any symbol and it works fine
 
-Next
+Next (rules.ts)
 -----
 Next step may be to even omit the declaration of symbols and deriver everything from rules
 
@@ -36,7 +36,7 @@ Or a rule that explicitly removes zeros (which is probably better, or just have 
 
 	0~ => ~
 
-Also adding may me caught in rules
+Also adding may be caught in rules
 
 	add(a,0) => a
 	add(a,b) => add(n(a),p(b))
@@ -44,11 +44,11 @@ Also adding may me caught in rules
 The second iteratively reduces the addition, until it reaches the first. Subtracting is similar
 
 For multiplying:
-	
+
 	mult(a,b) => mult(a,b,0)
 	mult(a,0,c) => c
 	mult(a,b,c) => mult(a,p(b),add(a,c))
-	
+
 These rules start with the first, carry a subtotal (c) to the third and iterates until no remaining additions (b) need to be done, the second returns the result
 
 For division, we first need comparison
@@ -65,8 +65,8 @@ Then, use the comparison as a stop condition
 	div(n,d,t,false) => div(sub(n,d),d,n(t),lt(sub(n,d),d))
 
 once operations are done a few times, a new rule can be learned that would skip the calculation
-like 
-	
+like
+
 	mult(4,8) => 32
 
 This would still allow all calculations, but speed up "known" calculations.
@@ -75,4 +75,10 @@ Note that rules need to have an order here
 
 Also, the predicates (=>) is just one example here. Rules need not be bound to only this predicate
 
-The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the while group of predicates.
+The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.
+
+Other number system
+------------
+
+If we are able to define prev and next rules for Roman numerals (probably involving other rules like IIII -> IV and IVI -> V), the rest should just work
+
