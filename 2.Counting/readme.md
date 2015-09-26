@@ -77,8 +77,38 @@ Also, the predicates (=>) is just one example here. Rules need not be bound to o
 
 The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.
 
+Better rules
+------------
+
+Multiplication rules can be simpler, especially for large numbers
+
 Other number system
 ------------
 
 If we are able to define prev and next rules for Roman numerals (probably involving other rules like IIII -> IV and IVI -> V), the rest should just work
 
+Attempt at next rules
+
+	n(~) -> ~I			//adding an I
+	n(0) -> I			//notion of 0
+	IIII -> ~IV			//4 rewriting
+	IVI -> ~V			//5 rewriting
+	VIIII -> ~IX		//9 rewriting
+	IXI -> ~X			//10 rewriting
+	XXXX -> XL			//40 rewriting
+	XLX	-> L			//50 rewriting
+	LXL -> XC			//90 rewriting
+	XCX -> X			//100
+	CCCC -> CD			//400
+	CDC -> D			//500
+	DCD -> CM			//900
+	CMC -> M			//1000
+
+prev rules
+
+	p(~I) -> ~			//remove the I
+	p(~V) -> ~IV
+	p(~IV) -> ~III
+	p(~X) -> ~IX
+	p(~IX) -> ~VIII
+	
