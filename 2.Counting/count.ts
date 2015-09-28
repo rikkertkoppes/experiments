@@ -60,11 +60,11 @@ function sub(base, delta) {
 }
 
 //4*3+0 -> 4*2+4 -> 4*1+8 -> 4*0+12 -> 12
-function mult(base, plier, start = ['0']) {
+function mult(base, plier, carry = ['0']) {
     if (isFirst(plier)) {
-        return start;
+        return carry;
     }
-    return mult(base, prev(plier), add(start, base));
+    return mult(base, prev(plier), add(carry, base));
 }
 
 //less than
