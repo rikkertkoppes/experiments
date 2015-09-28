@@ -1,4 +1,6 @@
-var rules = [];
+var mathRules = [];
+var decimalCounting = [];
+var romanCounting = [];
 function rule(regex, sub) {
     return function (str) {
         return str.replace(regex, sub);
@@ -17,69 +19,104 @@ function applier(rules) {
     };
 }
 //unshift to have last rules as most important
-//next decimal
-rules.unshift(rule(/next\(\)/, '1'));
-rules.unshift(rule(/next\((\d*)0\)/, '$11'));
-rules.unshift(rule(/next\((\d*)1\)/, '$12'));
-rules.unshift(rule(/next\((\d*)2\)/, '$13'));
-rules.unshift(rule(/next\((\d*)3\)/, '$14'));
-rules.unshift(rule(/next\((\d*)4\)/, '$15'));
-rules.unshift(rule(/next\((\d*)5\)/, '$16'));
-rules.unshift(rule(/next\((\d*)6\)/, '$17'));
-rules.unshift(rule(/next\((\d*)7\)/, '$18'));
-rules.unshift(rule(/next\((\d*)8\)/, '$19'));
-rules.unshift(rule(/next\((\d*)9\)/, 'next($1)0'));
-//next roman
-rules.unshift(rule(/next\((\w+)\)/, '$1I'));
-rules.unshift(rule(/next\(0\)/, 'I'));
-rules.unshift(rule(/IIII/, 'IV'));
-rules.unshift(rule(/IVI/, 'V'));
-rules.unshift(rule(/VIV/, 'IX'));
-rules.unshift(rule(/IXI/, 'X'));
-rules.unshift(rule(/XXXX/, 'XL'));
-rules.unshift(rule(/XLX/, 'L'));
-rules.unshift(rule(/LXL/, 'XC'));
-rules.unshift(rule(/XCX/, 'C'));
-rules.unshift(rule(/CCCC/, 'CD'));
-rules.unshift(rule(/CDC/, 'D'));
-rules.unshift(rule(/DCD/, 'CM'));
-rules.unshift(rule(/CMC/, 'M'));
+//inc decimal
+decimalCounting.unshift(rule(/inc\(\)/, '1'));
+decimalCounting.unshift(rule(/inc\((\d*)0\)/, '$11'));
+decimalCounting.unshift(rule(/inc\((\d*)1\)/, '$12'));
+decimalCounting.unshift(rule(/inc\((\d*)2\)/, '$13'));
+decimalCounting.unshift(rule(/inc\((\d*)3\)/, '$14'));
+decimalCounting.unshift(rule(/inc\((\d*)4\)/, '$15'));
+decimalCounting.unshift(rule(/inc\((\d*)5\)/, '$16'));
+decimalCounting.unshift(rule(/inc\((\d*)6\)/, '$17'));
+decimalCounting.unshift(rule(/inc\((\d*)7\)/, '$18'));
+decimalCounting.unshift(rule(/inc\((\d*)8\)/, '$19'));
+decimalCounting.unshift(rule(/inc\((\d*)9\)/, 'inc($1)0'));
 //previous
-rules.unshift(rule(/prev\(0\)/, 'NaN'));
-rules.unshift(rule(/prev\((\d+)0\)/, 'prev($1)9'));
-rules.unshift(rule(/prev\((\d*)1\)/, '$10'));
-rules.unshift(rule(/prev\((\d*)2\)/, '$11'));
-rules.unshift(rule(/prev\((\d*)3\)/, '$12'));
-rules.unshift(rule(/prev\((\d*)4\)/, '$13'));
-rules.unshift(rule(/prev\((\d*)5\)/, '$14'));
-rules.unshift(rule(/prev\((\d*)6\)/, '$15'));
-rules.unshift(rule(/prev\((\d*)7\)/, '$16'));
-rules.unshift(rule(/prev\((\d*)8\)/, '$17'));
-rules.unshift(rule(/prev\((\d*)9\)/, '$18'));
+decimalCounting.unshift(rule(/prev\(0\)/, 'NaN'));
+decimalCounting.unshift(rule(/dec\((\d+)0\)/, 'dec($1)9'));
+decimalCounting.unshift(rule(/dec\((\d*)1\)/, '$10'));
+decimalCounting.unshift(rule(/dec\((\d*)2\)/, '$11'));
+decimalCounting.unshift(rule(/dec\((\d*)3\)/, '$12'));
+decimalCounting.unshift(rule(/dec\((\d*)4\)/, '$13'));
+decimalCounting.unshift(rule(/dec\((\d*)5\)/, '$14'));
+decimalCounting.unshift(rule(/dec\((\d*)6\)/, '$15'));
+decimalCounting.unshift(rule(/dec\((\d*)7\)/, '$16'));
+decimalCounting.unshift(rule(/dec\((\d*)8\)/, '$17'));
+decimalCounting.unshift(rule(/dec\((\d*)9\)/, '$18'));
+//inc roman
+romanCounting.unshift(rule(/inc\(([IVXLCDM]+)\)/, '$1I'));
+romanCounting.unshift(rule(/inc\(0\)/, 'I'));
+romanCounting.unshift(rule(/IIII/, 'IV'));
+romanCounting.unshift(rule(/IVI/, 'V'));
+romanCounting.unshift(rule(/VIV/, 'IX'));
+romanCounting.unshift(rule(/IXI/, 'X'));
+romanCounting.unshift(rule(/XXXX/, 'XL'));
+romanCounting.unshift(rule(/XLX/, 'L'));
+romanCounting.unshift(rule(/LXL/, 'XC'));
+romanCounting.unshift(rule(/XCX/, 'C'));
+romanCounting.unshift(rule(/CCCC/, 'CD'));
+romanCounting.unshift(rule(/CDC/, 'D'));
+romanCounting.unshift(rule(/DCD/, 'CM'));
+romanCounting.unshift(rule(/CMC/, 'M'));
+//dec roman
+romanCounting.unshift(rule(/dec\(0\)/, 'NaN'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]+)I\)/, '$1'));
+romanCounting.unshift(rule(/dec\(I\)/, '0'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)V\)/, '$1IV'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)IV\)/, '$1III'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)X\)/, '$1IX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)IX\)/, '$1VIII'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)L\)/, '$1XLIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)XL\)/, '$1XXXIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)C\)/, '$1XCIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)XC\)/, '$1LXXXIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)D\)/, '$1CDXCIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)CD\)/, '$1CCCXCIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)M\)/, '$1CMXCIX'));
+romanCounting.unshift(rule(/dec\(([IVXLCDM]*)CM\)/, '$1DCCCXCIX'));
 //addition
-rules.unshift(rule(/add\((\d+),(\d+)\)/, 'add(next($1),prev($2))'));
-rules.unshift(rule(/add\((\d+),0\)/, '$1'));
+mathRules.unshift(rule(/add\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'add(inc($1),dec($2))'));
+mathRules.unshift(rule(/add\(([0-9IVXLCDM]+),0\)/, '$1'));
 //normal syntax: a+b -> add(a,b)
-rules.unshift(rule(/(\d+)\s?\+\s?(\d+)/, 'add($1,$2)'));
+mathRules.unshift(rule(/([0-9IVXLCDM]+)\s?\+\s?([0-9IVXLCDM]+)/, 'add($1,$2)'));
 //subtraction
-rules.unshift(rule(/sub\((\d+),(\d+)\)/, 'sub(prev($1),prev($2))'));
-rules.unshift(rule(/sub\((\d+),0\)/, '$1'));
+mathRules.unshift(rule(/sub\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'sub(dec($1),dec($2))'));
+mathRules.unshift(rule(/sub\(([0-9IVXLCDM]+),0\)/, '$1'));
+//not below zero
+mathRules.unshift(rule(/sub\(NaN,([0-9IVXLCDM]+)\)/, 'NaN'));
 //normal syntax: a-b -> sub(a,b)
-rules.unshift(rule(/(\d+)\s?\-\s?(\d+)/, 'sub($1,$2)'));
+mathRules.unshift(rule(/([0-9IVXLCDM]+)\s?\-\s?([0-9IVXLCDM]+)/, 'sub($1,$2)'));
 //multiplication
-rules.unshift(rule(/mul\((\d+),(\d+),(\d+)\)/, 'mul($1,prev($2),add($1,$3))'));
-rules.unshift(rule(/mul\((\d+),0,(\d+)\)/, '$2'));
-rules.unshift(rule(/mul\((\d+),(\d+)\)/, 'mul($1,$2,0)'));
+mathRules.unshift(rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,dec($2),add($1,$3))'));
+mathRules.unshift(rule(/mul\(([0-9IVXLCDM]+),0,([0-9IVXLCDM]+)\)/, '$2'));
+mathRules.unshift(rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,$2,0)'));
 //normal syntax: a*b -> mul(a,b)
-rules.unshift(rule(/(\d+)\s?\*\s?(\d+)/, 'mul($1,$2)'));
+mathRules.unshift(rule(/([0-9IVXLCDM]+)\s?\*\s?([0-9IVXLCDM]+)/, 'mul($1,$2)'));
+//comparison
+mathRules.unshift(rule(/lt\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'lt(dec($1),dec($2))'));
+mathRules.unshift(rule(/lt\(0,[1-9IVXLCDM]+\)/, 'T'));
+mathRules.unshift(rule(/lt\([0-9IVXLCDM]+,0\)/, 'F'));
+//division, using comparison
+mathRules.unshift(rule(/div\([0-9IVXLCDM]+,0\)/, 'NaN')); //division by 0
+mathRules.unshift(rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'div($1,$2,0,lt($1,$2))'));
+mathRules.unshift(rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),T\)/, '$3'));
+mathRules.unshift(rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),F\)/, 'div(sub($1,$2),$2,inc($3),lt(sub($1,$2),$2))'));
+//normal syntax: a/b -> div(a,b)
+mathRules.unshift(rule(/([0-9IVXLCDM]+)\s?\/\s?([0-9IVXLCDM]+)/, 'div($1,$2)'));
 //remove leading zeros
-rules.unshift(rule(/0*(\d+)/g, '$1'));
-var apply = applier(rules);
-// var input = '7 -1 * 6 + 3';
-// console.log(apply(input));
-var count = 110;
-var current = '0';
-while (count--) {
-    console.log(current);
-    current = apply('next(' + current + ')');
-}
+mathRules.unshift(rule(/0*(\d+)/g, '$1'));
+var applyDecimal = applier([].concat(decimalCounting, mathRules));
+var applyRoman = applier([].concat(romanCounting, mathRules));
+var input = '7 -1 * 6 + 3';
+var input = 'lt(0,0)';
+console.log(applyDecimal(input));
+var input = 'I + IX * V - IV';
+// console.log(applyRoman(input));
+// var count = 110;
+// var currentRoman = 'M';
+// var currentDecimal = '1000';
+// while (count--) {
+//     console.log(currentDecimal,currentRoman);
+//     currentRoman = applyRoman('dec(' + currentRoman + ')');
+//     currentDecimal = applyDecimal('dec(' + currentDecimal + ')');
+// } 
