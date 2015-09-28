@@ -1,6 +1,10 @@
 Thinking with RDF
 ===========
 
+Libraries
+
+- http://www.w3.org/community/rdfjs/wiki/Comparison_of_RDFJS_libraries
+
 Knowledge
 --------
 

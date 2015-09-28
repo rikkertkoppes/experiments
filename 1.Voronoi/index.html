@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Document</title>
+    <link rel="stylesheet" href="../markdown.css">
     <script src="http://paperjs.org/assets/js/rhill-voronoi-core.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.9.24/paper-core.min.js"></script>
     <style>
@@ -14,8 +15,15 @@
     </style>
 </head>
 <body>
-    <canvas id="myCanvas" resize></canvas>
+
+<h1>Voronoi cell distribution</h1>
+<p>
+    A random cell distribution (try reload) and signal propagation between neighboring cells
+</p>
+<canvas id="myCanvas" resize></canvas>
+<p>
     <button onclick="fireRandom(2)">Activate 2 random spots</button>
-    <script src="js/main.js"></script>
+</p>
+<script src="js/main.js"></script>
 </body>
 </html>

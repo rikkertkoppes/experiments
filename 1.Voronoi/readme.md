@@ -25,7 +25,7 @@ Sources
 
 Voronoi
 
-- http://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf
-- http://paperjs.org/examples/voronoi/
-- http://www.raymondhill.net/voronoi/rhill-voronoi-demo5.html
-- http://paperjs.org/assets/js/rhill-voronoi-core.js
+- <http://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf>
+- <http://paperjs.org/examples/voronoi/>
+- <http://www.raymondhill.net/voronoi/rhill-voronoi-demo5.html>
+- <http://paperjs.org/assets/js/rhill-voronoi-core.js>
