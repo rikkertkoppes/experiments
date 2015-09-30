@@ -3,66 +3,222 @@ Counting (count.ts - positive integer math)
 
 Goal: build up basic math from the principle of counting
 
-Observations: defined symbols for decimal numbers, they can be any base and any symbol and it works fine
+Created two implementation. One functional, based around function composition (`count.ts`). The other is a rule based system based on regular expression string replacement (`rules.ts`).
 
-Next (rules.ts)
+Observations:
+--------
+
+- defined symbols for decimal numbers, they can be any base and any symbol and it works fine
+- defined symbols for roman numbers, these are somewhat different, yet still simple
+- it is possible to set up basic positive integer math using substitution rules alone
+- the system can learn by remembering (adding rules for) calculations that have already been done. We learn the tables of multiplication below 10 in order to do long multiplication
+
+Demo's
+---------
+
+### Decimals
+
+Basic positive integer math (including 0), using string substitution.
+
+These are the rules for incrementing numbers:
+
+	rule(/inc\(\)/, '1');
+	rule(/inc\((\d*)0\)/, '$11');
+	rule(/inc\((\d*)1\)/, '$12');
+	rule(/inc\((\d*)2\)/, '$13');
+	rule(/inc\((\d*)3\)/, '$14');
+	rule(/inc\((\d*)4\)/, '$15');
+	rule(/inc\((\d*)5\)/, '$16');
+	rule(/inc\((\d*)6\)/, '$17');
+	rule(/inc\((\d*)7\)/, '$18');
+	rule(/inc\((\d*)8\)/, '$19');
+	rule(/inc\((\d*)9\)/, 'inc($1)0');
+
+And these for decrementing
+
+	rule(/dec\(0\)/, 'NaN');
+	rule(/dec\((\d+)0\)/, 'dec($1)9');
+	rule(/dec\((\d*)1\)/, '$10');
+	rule(/dec\((\d*)2\)/, '$11');
+	rule(/dec\((\d*)3\)/, '$12');
+	rule(/dec\((\d*)4\)/, '$13');
+	rule(/dec\((\d*)5\)/, '$14');
+	rule(/dec\((\d*)6\)/, '$15');
+	rule(/dec\((\d*)7\)/, '$16');
+	rule(/dec\((\d*)8\)/, '$17');
+	rule(/dec\((\d*)9\)/, '$18');
+	//remove leading zeros
+	rule(/0*(\d+)/g, '$1');
+
+### Romans
+
+Basic math using roman numerals. The only thing that differers from the decimal implementation are the rules for incrementing and decrementing.
+
+These are the rules for incrementing
+
+	rule(/inc\(([IVXLCDM]+)\)/, '$1I');
+	rule(/inc\(0\)/, 'I');
+	rule(/IIII/, 'IV');
+	rule(/IVI/, 'V');
+	rule(/VIV/, 'IX');
+	rule(/IXI/, 'X');
+	rule(/XXXX/, 'XL');
+	rule(/XLX/, 'L');
+	rule(/LXL/, 'XC');
+	rule(/XCX/, 'C');
+	rule(/CCCC/, 'CD');
+	rule(/CDC/, 'D');
+	rule(/DCD/, 'CM');
+	rule(/CMC/, 'M');
+
+And these for decrementing
+
+	rule(/dec\(0\)/, 'NaN');
+	rule(/dec\(([IVXLCDM]+)I\)/, '$1');
+	rule(/dec\(I\)/, '0');
+	rule(/dec\(([IVXLCDM]*)V\)/, '$1IV');
+	rule(/dec\(([IVXLCDM]*)IV\)/, '$1III');
+	rule(/dec\(([IVXLCDM]*)X\)/, '$1IX');
+	rule(/dec\(([IVXLCDM]*)IX\)/, '$1VIII');
+	rule(/dec\(([IVXLCDM]*)L\)/, '$1XLIX');
+	rule(/dec\(([IVXLCDM]*)XL\)/, '$1XXXIX');
+	rule(/dec\(([IVXLCDM]*)C\)/, '$1XCIX');
+	rule(/dec\(([IVXLCDM]*)XC\)/, '$1LXXXIX');
+	rule(/dec\(([IVXLCDM]*)D\)/, '$1CDXCIX');
+	rule(/dec\(([IVXLCDM]*)CD\)/, '$1CCCXCIX');
+	rule(/dec\(([IVXLCDM]*)M\)/, '$1CMXCIX');
+	rule(/dec\(([IVXLCDM]*)CM\)/, '$1DCCCXCIX');
+
+Doing math
 -----
-Next step may be to even omit the declaration of symbols and deriver everything from rules
 
-rules for next in decimal (don't even need the symbols)
+### Addition
 
-	n(~0) => ~1
-	n(~1) => ~2
-	n(~2) => ~3
-	n(~3) => ~4
-	n(~4) => ~5
-	n(~5) => ~6
-	n(~6) => ~7
-	n(~7) => ~8
-	n(~8) => ~9
-	n(~9) => n(~)0
+We can perform addition by iteratively incrementing one operand and decrementing the other until the second equals 0. Then another rule kicks in stating that a number plus 0 equals the number:
 
-prev rules are similar, but reversed, also, we need an extra for N, since no negatives
+	rule(/add\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'add(inc($1),dec($2))');
+	rule(/add\(([0-9IVXLCDM]+),0\)/, '$1');
 
-	p(0) => NaN
-	p(~0) => p(~)9
-	p(~1) => p(~0)
+Furthermore, we add a rule to rewrite normal math (`a + b`) in the format used in the rules (`add(a,b)`)
 
-how to remove leading zero's? -> by defining a special rule to decrement 10:
+	rule(/([0-9IVXLCDM]+)\s?\+\s?([0-9IVXLCDM]+)/, 'add($1,$2)');
 
-	p(10) => 9
+The substitution sequence goes like this
 
-Or a rule that explicitly removes zeros (which is probably better, or just have both):
+	4 + 3		//input
+	add(4,3)	//3rd rule
+	add(5,2)	//1st rule
+	add(6,1)	//1st rule
+	add(7,0)	//1st rule
+	7			//2nd rule
 
-	0~ => ~
+### Subtraction
 
-Also adding may be caught in rules
+This is basically the same as addition, decrement the first number and the second number until the second is 0. Then another rule kicks in that returns the number itself.
 
-	add(a,0) => a
-	add(a,b) => add(n(a),p(b))
+	rule(/sub\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'sub(dec($1),dec($2))');
+	rule(/sub\(([0-9IVXLCDM]+),0\)/, '$1');
 
-The second iteratively reduces the addition, until it reaches the first. Subtracting is similar
+Note that you can't go below 0, to the first number should be greater than or equal to the second
 
-For multiplying:
+	rule(/sub\(NaN,([0-9IVXLCDM]+)\)/, 'NaN');
 
-	mult(a,b) => mult(a,b,0)
-	mult(a,0,c) => c
-	mult(a,b,c) => mult(a,p(b),add(a,c))
+Also, there is a rule that rewrites normal math in the representation used here:
 
-These rules start with the first, carry a subtotal (c) to the third and iterates until no remaining additions (b) need to be done, the second returns the result
+	rule(/([0-9IVXLCDM]+)\s?\-\s?([0-9IVXLCDM]+)/, 'sub($1,$2)');
 
-For division, we first need comparison
+The substitution sequence goes like this
 
-	lt(a,0) => false
-	lt(0,b) => true
-	lt(a,b) => lt(p(a),p(b))		//this is VERY simple, may be optimized by looking at digits
+	4 - 3		//input
+	sub(4,3)	//4rd rule
+	sub(3,2)	//1st rule
+	sub(2,1)	//1st rule
+	sub(1,0)	//1st rule
+	1			//2nd rule
 
-Then, use the comparison as a stop condition
+### Multiplication
 
-	div(a,0) => NaN
-	div(n,d) => div(n,d,0,lt(n,d))
-	div(n,d,t,true) => t
-	div(n,d,t,false) => div(sub(n,d),d,n(t),lt(sub(n,d),d))
+This is done by repeated addition:
+
+	rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,dec($2),add($1,$3))');
+	rule(/mul\(([0-9IVXLCDM]+),0,([0-9IVXLCDM]+)\)/, '$2');
+	rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,$2,0)');
+
+And math rewriting
+
+	rule(/([0-9IVXLCDM]+)\s?\*\s?([0-9IVXLCDM]+)/, 'mul($1,$2)');
+
+Note that a subtotal is carried over as the third argument to `mul`. The substitution sequence goes like this:
+
+	4 * 3			//input
+	mul(4,3)		//4th rule
+	mul(4,3,0)		//3rd rule
+	mul(4,2,4)		//1st rule
+	mul(4,1,8)		//1st rule
+	mul(4,0,12)		//1st rule
+	12				//2nd rule
+
+Also note that the above substitution sequences are simplifications. What actually happens is more like this:
+
+	...
+	mul(4,3,0)							//multiplication 3rd rule
+	mul(4,dec(3),add(4,0))				//multiplication 1st rule
+	mul(4,dec(3),4)						//addition 2nd rule
+	mul(4,2,4)							//decrement 5th rule
+	mul(4,dec(2),add(4,4))				//multiplication 1st rule
+	mul(4,dec(2),add(inc(4),dec(4)))	//addition 1st rule
+	mul(4,dec(2),add(5,dec(4)))			//increment 6th rule
+	mul(4,dec(2),add(5,3))				//decrement 6th rule
+	...
+	mul(4,dec(2),8))					//addition 2nd rule
+	mul(4,1,8)							//decrement 4th rule
+	...
+	mul(4,0,12)							//multiplication 1st rule
+	12									//multiplication 2nd rule
+
+### Division
+
+Division is done by repeated subtraction. We first need a comparison rule to be able to define a stop rule when the numerator is smaller than de denominator:
+
+	rule(/lt\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'lt(dec($1),dec($2))');
+	rule(/lt\(0,[1-9IVXLCDM]+\)/, 'T');
+	rule(/lt\([0-9IVXLCDM]+,0\)/, 'F');
+
+These rules state that:
+
+1. Anything is not smaller than 0, including 0 (3rd rule)
+2. 0 is always smaller than anything, except 0
+3. for all other numbers, compare the decremented numbers
+
+Then for division, we have
+
+	rule(/div\([0-9IVXLCDM]+,0\)/, 'NaN');
+	rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'div($1,$2,0,lt($1,$2))');
+	rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),T\)/, '$3');
+	rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),F\)/, 'div(sub($1,$2),$2,inc($3),lt(sub($1,$2),$2))');
+
+And math rewriting
+
+	rule(/([0-9IVXLCDM]+)\s?\/\s?([0-9IVXLCDM]+)/, 'div($1,$2)');
+
+The first rule prohibits dividing by 0, the second sets things up (much like multiplication). The third is a stop rule, returning the accumulated quotient. The last rule accumulates the quotient while the stop condition is not true.
+
+The (simplified) substitution sequence is like this:
+
+	13 / 4
+	div(13,4)		//5th rule
+	div(13,4,0,F)	//2nd rule
+	div(9,4,1,F)	//4th rule
+	div(5,4,2,F)	//4th rule
+	div(1,4,3,T)	//4th rule
+	3				//3rd rule
+
+Notes
+-----
+
+- 0 is treated as a special case, decrementing it leads to NaN since we are only working with positive integer math here
+- we may write the math rules directely in the normal format
+
 
 once operations are done a few times, a new rule can be learned that would skip the calculation
 like
@@ -81,34 +237,3 @@ Better rules
 ------------
 
 Multiplication rules can be simpler, especially for large numbers
-
-Other number system
-------------
-
-If we are able to define prev and next rules for Roman numerals (probably involving other rules like IIII -> IV and IVI -> V), the rest should just work
-
-Attempt at next rules
-
-	n(~) -> ~I			//adding an I
-	n(0) -> I			//notion of 0
-	IIII -> ~IV			//4 rewriting
-	IVI -> ~V			//5 rewriting
-	VIIII -> ~IX		//9 rewriting
-	IXI -> ~X			//10 rewriting
-	XXXX -> XL			//40 rewriting
-	XLX	-> L			//50 rewriting
-	LXL -> XC			//90 rewriting
-	XCX -> X			//100
-	CCCC -> CD			//400
-	CDC -> D			//500
-	DCD -> CM			//900
-	CMC -> M			//1000
-
-prev rules
-
-	p(~I) -> ~			//remove the I
-	p(~V) -> ~IV
-	p(~IV) -> ~III
-	p(~X) -> ~IX
-	p(~IX) -> ~VIII
-	

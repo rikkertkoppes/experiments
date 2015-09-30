@@ -25,5 +25,38 @@
     <button onclick="fireRandom(2)">Activate 2 random spots</button>
 </p>
 <script src="js/main.js"></script>
+<h1>Notes</h1>
+<h2>Goal:</h2>
+
+<ul>
+<li>Randomly seed a rectangle with cells</li>
+<li>calculate nearest neughbors using voronoi</li>
+<li>create an in memory network (2D)</li>
+<li>visualize the network</li>
+<li>allow propagation of signals</li>
+</ul>
+
+<h2>Observations</h2>
+
+<ul>
+<li>non-regular network results in interesting behaviour. Bits of activity pop up in unexpected places</li>
+<li>firing from multiple spots sometimes leads to lingering activity in the middle</li>
+<li>every activity dies off after some time</li>
+<li>network propagation is best done by internal reflection: every cell should look at its neighbors to determine its own state (like a cellular automaton), rather than dictating its neighbors</li>
+<li>need a diffusion / wave propagation CA </li>
+<li>every fire adds energy to the system, need dissipation</li>
+</ul>
+
+<h2>Sources</h2>
+
+<p>Voronoi</p>
+
+<ul>
+<li><a href="http://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf">http://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf</a></li>
+<li><a href="http://paperjs.org/examples/voronoi/">http://paperjs.org/examples/voronoi/</a></li>
+<li><a href="http://www.raymondhill.net/voronoi/rhill-voronoi-demo5.html">http://www.raymondhill.net/voronoi/rhill-voronoi-demo5.html</a></li>
+<li><a href="http://paperjs.org/assets/js/rhill-voronoi-core.js">http://paperjs.org/assets/js/rhill-voronoi-core.js</a></li>
+</ul>
+
 </body>
 </html>

@@ -4,6 +4,20 @@ Thinking with RDF
 Libraries
 
 - http://www.w3.org/community/rdfjs/wiki/Comparison_of_RDFJS_libraries
+- http://www.michelepasin.org/blog/2011/02/24/survey-of-pythonic-tools-for-rdf-and-linked-data-programming/
+
+Implementation
+--------
+
+"firing" a node in RDF can get complicated fast. Given a node, we can get all related stuff with a SPARQL query (using the node as subject, predicate or object). All related nodes get "activated" and to find the related nodes of those, we need to create additional queries.
+
+This grows exponentially and does not handle loops.
+
+Can we build a somewhat smarter system, exploiting the fact that signals are fired in a hierarchical fasion in the brain?
+
+Also, does is make sense to approach it as a cellular automaton instead, checking the state of each node (neuron) on each tick? This scales linearly, but is probably very intensive.
+
+So... RDF is fine to define the structure, but operating on it requires something better than the usual libraries (we also need some more metadata on nodes)
 
 Knowledge
 --------

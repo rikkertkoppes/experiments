@@ -5,6 +5,7 @@
 	<title>Document</title>
 	<link rel="stylesheet" href="../markdown.css">
 	<script src="count.js"></script>
+	<script src="rules.js"></script>
 	<style>
 		object {
 			display: block;
@@ -15,7 +16,296 @@
 	</style>
 </head>
 <body>
-	<h1>Counting</h1>
-	<object data="readme.md" type=""></object>	
+
+<h1>Rules</h1>
+<h2>Decimal math</h2>
+<p>Try evaluating an equation</p>
+<p>
+	<input id="inputDecimal" type="text" value="1 + 9 * 5 - 4">
+	<button onclick="calculateDecimal()">Calculate</button>
+	<span id="outputDecimal"></span>
+</p>
+<h2>Roman math</h2>
+<p>Try evaluating an equation</p>
+<p>
+	<input id="inputRoman" type="text" value="I + IX * V - IV">
+	<button onclick="calculateRoman()">Calculate</button>
+	<span id="outputRoman"></span>
+</p>
+<script>
+	function input(id) {
+		return document.getElementById(id).value;
+	}
+	function output(id,value) {
+		document.getElementById(id).innerHTML = value;
+	}
+	function calculateDecimal() {
+		var res = applyDecimal(input('inputDecimal'))
+		output('outputDecimal',res);
+	}
+	function calculateRoman() {
+		var res = applyRoman(input('inputRoman'))
+		output('outputRoman',res);
+	}
+</script>
+
+<h1>Counting (count.ts - positive integer math)</h1>
+
+<p>Goal: build up basic math from the principle of counting</p>
+
+<p>Created two implementation. One functional, based around function composition (<code>count.ts</code>). The other is a rule based system based on regular expression string replacement (<code>rules.ts</code>).</p>
+
+<h2>Observations:</h2>
+
+<ul>
+<li>defined symbols for decimal numbers, they can be any base and any symbol and it works fine</li>
+<li>defined symbols for roman numbers, these are somewhat different, yet still simple</li>
+<li>it is possible to set up basic positive integer math using substitution rules alone</li>
+</ul>
+
+<h2>Demo's</h2>
+
+<h3>Decimals</h3>
+
+<p>Basic positive integer math (including 0), using string substitution.</p>
+
+<p>These are the rules for incrementing numbers:</p>
+
+<pre><code>rule(/inc\(\)/, '1');
+rule(/inc\((\d*)0\)/, '$11');
+rule(/inc\((\d*)1\)/, '$12');
+rule(/inc\((\d*)2\)/, '$13');
+rule(/inc\((\d*)3\)/, '$14');
+rule(/inc\((\d*)4\)/, '$15');
+rule(/inc\((\d*)5\)/, '$16');
+rule(/inc\((\d*)6\)/, '$17');
+rule(/inc\((\d*)7\)/, '$18');
+rule(/inc\((\d*)8\)/, '$19');
+rule(/inc\((\d*)9\)/, 'inc($1)0');
+</code></pre>
+
+<p>And these for decrementing</p>
+
+<pre><code>rule(/dec\(0\)/, 'NaN');
+rule(/dec\((\d+)0\)/, 'dec($1)9');
+rule(/dec\((\d*)1\)/, '$10');
+rule(/dec\((\d*)2\)/, '$11');
+rule(/dec\((\d*)3\)/, '$12');
+rule(/dec\((\d*)4\)/, '$13');
+rule(/dec\((\d*)5\)/, '$14');
+rule(/dec\((\d*)6\)/, '$15');
+rule(/dec\((\d*)7\)/, '$16');
+rule(/dec\((\d*)8\)/, '$17');
+rule(/dec\((\d*)9\)/, '$18');
+//remove leading zeros
+rule(/0*(\d+)/g, '$1');
+</code></pre>
+
+<h3>Romans</h3>
+
+<p>Basic math using roman numerals. The only thing that differers from the decimal implementation are the rules for incrementing and decrementing.</p>
+
+<p>These are the rules for incrementing</p>
+
+<pre><code>rule(/inc\(([IVXLCDM]+)\)/, '$1I');
+rule(/inc\(0\)/, 'I');
+rule(/IIII/, 'IV');
+rule(/IVI/, 'V');
+rule(/VIV/, 'IX');
+rule(/IXI/, 'X');
+rule(/XXXX/, 'XL');
+rule(/XLX/, 'L');
+rule(/LXL/, 'XC');
+rule(/XCX/, 'C');
+rule(/CCCC/, 'CD');
+rule(/CDC/, 'D');
+rule(/DCD/, 'CM');
+rule(/CMC/, 'M');
+</code></pre>
+
+<p>And these for decrementing</p>
+
+<pre><code>rule(/dec\(0\)/, 'NaN');
+rule(/dec\(([IVXLCDM]+)I\)/, '$1');
+rule(/dec\(I\)/, '0');
+rule(/dec\(([IVXLCDM]*)V\)/, '$1IV');
+rule(/dec\(([IVXLCDM]*)IV\)/, '$1III');
+rule(/dec\(([IVXLCDM]*)X\)/, '$1IX');
+rule(/dec\(([IVXLCDM]*)IX\)/, '$1VIII');
+rule(/dec\(([IVXLCDM]*)L\)/, '$1XLIX');
+rule(/dec\(([IVXLCDM]*)XL\)/, '$1XXXIX');
+rule(/dec\(([IVXLCDM]*)C\)/, '$1XCIX');
+rule(/dec\(([IVXLCDM]*)XC\)/, '$1LXXXIX');
+rule(/dec\(([IVXLCDM]*)D\)/, '$1CDXCIX');
+rule(/dec\(([IVXLCDM]*)CD\)/, '$1CCCXCIX');
+rule(/dec\(([IVXLCDM]*)M\)/, '$1CMXCIX');
+rule(/dec\(([IVXLCDM]*)CM\)/, '$1DCCCXCIX');
+</code></pre>
+
+<h2>Doing math</h2>
+
+<h3>Addition</h3>
+
+<p>We can perform addition by iteratively incrementing one operand and decrementing the other until the second equals 0. Then another rule kicks in stating that a number plus 0 equals the number:</p>
+
+<pre><code>rule(/add\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'add(inc($1),dec($2))');
+rule(/add\(([0-9IVXLCDM]+),0\)/, '$1');
+</code></pre>
+
+<p>Furthermore, we add a rule to rewrite normal math (<code>a + b</code>) in the format used in the rules (<code>add(a,b)</code>)</p>
+
+<pre><code>rule(/([0-9IVXLCDM]+)\s?\+\s?([0-9IVXLCDM]+)/, 'add($1,$2)');
+</code></pre>
+
+<p>The substitution sequence goes like this</p>
+
+<pre><code>4 + 3       //input
+add(4,3)    //3rd rule
+add(5,2)    //1st rule
+add(6,1)    //1st rule
+add(7,0)    //1st rule
+7           //2nd rule
+</code></pre>
+
+<h3>Subtraction</h3>
+
+<p>This is basically the same as addition, decrement the first number and the second number until the second is 0. Then another rule kicks in that returns the number itself.</p>
+
+<pre><code>rule(/sub\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'sub(dec($1),dec($2))');
+rule(/sub\(([0-9IVXLCDM]+),0\)/, '$1');
+</code></pre>
+
+<p>Note that you can't go below 0, to the first number should be greater than or equal to the second</p>
+
+<pre><code>rule(/sub\(NaN,([0-9IVXLCDM]+)\)/, 'NaN');
+</code></pre>
+
+<p>Also, there is a rule that rewrites normal math in the representation used here:</p>
+
+<pre><code>rule(/([0-9IVXLCDM]+)\s?\-\s?([0-9IVXLCDM]+)/, 'sub($1,$2)');
+</code></pre>
+
+<p>The substitution sequence goes like this</p>
+
+<pre><code>4 - 3       //input
+sub(4,3)    //4rd rule
+sub(3,2)    //1st rule
+sub(2,1)    //1st rule
+sub(1,0)    //1st rule
+1           //2nd rule
+</code></pre>
+
+<h3>Multiplication</h3>
+
+<p>This is done by repeated addition:</p>
+
+<pre><code>rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,dec($2),add($1,$3))');
+rule(/mul\(([0-9IVXLCDM]+),0,([0-9IVXLCDM]+)\)/, '$2');
+rule(/mul\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'mul($1,$2,0)');
+</code></pre>
+
+<p>And math rewriting</p>
+
+<pre><code>rule(/([0-9IVXLCDM]+)\s?\*\s?([0-9IVXLCDM]+)/, 'mul($1,$2)');
+</code></pre>
+
+<p>Note that a subtotal is carried over as the third argument to <code>mul</code>. The substitution sequence goes like this:</p>
+
+<pre><code>4 * 3           //input
+mul(4,3)        //4th rule
+mul(4,3,0)      //3rd rule
+mul(4,2,4)      //1st rule
+mul(4,1,8)      //1st rule
+mul(4,0,12)     //1st rule
+12              //2nd rule
+</code></pre>
+
+<p>Also note that the above substitution sequences are simplifications. What actually happens is more like this:</p>
+
+<pre><code>...
+mul(4,3,0)                          //multiplication 3rd rule
+mul(4,dec(3),add(4,0))              //multiplication 1st rule
+mul(4,dec(3),4)                     //addition 2nd rule
+mul(4,2,4)                          //decrement 5th rule
+mul(4,dec(2),add(4,4))              //multiplication 1st rule
+mul(4,dec(2),add(inc(4),dec(4)))    //addition 1st rule
+mul(4,dec(2),add(5,dec(4)))         //increment 6th rule
+mul(4,dec(2),add(5,3))              //decrement 6th rule
+...
+mul(4,dec(2),8))                    //addition 2nd rule
+mul(4,1,8)                          //decrement 4th rule
+...
+mul(4,0,12)                         //multiplication 1st rule
+12                                  //multiplication 2nd rule
+</code></pre>
+
+<h3>Division</h3>
+
+<p>Division is done by repeated subtraction. We first need a comparison rule to be able to define a stop rule when the numerator is smaller than de denominator:</p>
+
+<pre><code>rule(/lt\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'lt(dec($1),dec($2))');
+rule(/lt\(0,[1-9IVXLCDM]+\)/, 'T');
+rule(/lt\([0-9IVXLCDM]+,0\)/, 'F');
+</code></pre>
+
+<p>These rules state that:</p>
+
+<ol>
+<li>Anything is not smaller than 0, including 0 (3rd rule)</li>
+<li>0 is always smaller than anything, except 0</li>
+<li>for all other numbers, compare the decremented numbers</li>
+</ol>
+
+<p>Then for division, we have</p>
+
+<pre><code>rule(/div\([0-9IVXLCDM]+,0\)/, 'NaN');
+rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+)\)/, 'div($1,$2,0,lt($1,$2))');
+rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),T\)/, '$3');
+rule(/div\(([0-9IVXLCDM]+),([0-9IVXLCDM]+),([0-9IVXLCDM]+),F\)/, 'div(sub($1,$2),$2,inc($3),lt(sub($1,$2),$2))');
+</code></pre>
+
+<p>And math rewriting</p>
+
+<pre><code>rule(/([0-9IVXLCDM]+)\s?\/\s?([0-9IVXLCDM]+)/, 'div($1,$2)');
+</code></pre>
+
+<p>The first rule prohibits dividing by 0, the second sets things up (much like multiplication). The third is a stop rule, returning the accumulated quotient. The last rule accumulates the quotient while the stop condition is not true.</p>
+
+<p>The (simplified) substitution sequence is like this:</p>
+
+<pre><code>13 / 4
+div(13,4)       //5th rule
+div(13,4,0,F)   //2nd rule
+div(9,4,1,F)    //4th rule
+div(5,4,2,F)    //4th rule
+div(1,4,3,T)    //4th rule
+3               //3rd rule
+</code></pre>
+
+<h2>Notes (rules.ts)</h2>
+
+<ul>
+<li>0 is treated as a special case, decrementing it leads to NaN since we are only working with positive integer math here</li>
+<li>we may write the math rules directely in the normal format</li>
+</ul>
+
+<p>once operations are done a few times, a new rule can be learned that would skip the calculation
+like</p>
+
+<pre><code>mult(4,8) =&gt; 32
+</code></pre>
+
+<p>This would still allow all calculations, but speed up "known" calculations.</p>
+
+<p>Note that rules need to have an order here</p>
+
+<p>Also, the predicates (=&gt;) is just one example here. Rules need not be bound to only this predicate</p>
+
+<p>The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.</p>
+
+<h2>Better rules</h2>
+
+<p>Multiplication rules can be simpler, especially for large numbers</p>
+
 </body>
 </html>
