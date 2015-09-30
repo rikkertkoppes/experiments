@@ -1,7 +1,9 @@
-Counting (count.ts - positive integer math)
+Counting (positive integer math)
 ==========
 
 Goal: build up basic math from the principle of counting
+
+Result: <http://rikkertkoppes.github.io/experiments/2.Counting/>
 
 Created two implementation. One functional, based around function composition (`count.ts`). The other is a rule based system based on regular expression string replacement (`rules.ts`).
 
@@ -91,6 +93,10 @@ And these for decrementing
 
 Doing math
 -----
+
+When doing math, the order of rules becomes very important. The rules are stored in an array and the rules engine applies the first rules in the array first.
+
+In the source code, the most important rules come last. This is done by prepending every rule to the already existing array (by using `unshift`)
 
 ### Addition
 
@@ -213,27 +219,27 @@ The (simplified) substitution sequence is like this:
 	div(1,4,3,T)	//4th rule
 	3				//3rd rule
 
-Notes
------
+Improvements
+---------
 
-- 0 is treated as a special case, decrementing it leads to NaN since we are only working with positive integer math here
-- we may write the math rules directely in the normal format
+Some ideas for improvements:
 
-
-once operations are done a few times, a new rule can be learned that would skip the calculation
+- we may write the math rules directely in the normal format (`1+2` instead of `add(1,2)`)
+- once operations are done a few times, a new rule can be learned that would skip the calculation
 like
 
-	mult(4,8) => 32
+		mult(4,8) => 32
 
-This would still allow all calculations, but speed up "known" calculations.
+	This would still allow all calculations, but speed up "known" calculations.
 
-Note that rules need to have an order here
+- Multiplication rules can be simpler, especially for large numbers (long multiplication)
+- Same for division (long division)
 
-Also, the predicates (=>) is just one example here. Rules need not be bound to only this predicate
+Rules to RDF triples
+-----
+
+Rules can be generalized to RDF triples, in which the predicate can have a particular rdf:domain, e.g. integer math.
 
 The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.
 
-Better rules
-------------
 
-Multiplication rules can be simpler, especially for large numbers

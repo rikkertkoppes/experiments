@@ -49,9 +49,11 @@
 	}
 </script>
 
-<h1>Counting (count.ts - positive integer math)</h1>
+<h1>Counting (positive integer math)</h1>
 
 <p>Goal: build up basic math from the principle of counting</p>
+
+<p>Result: <a href="http://rikkertkoppes.github.io/experiments/2.Counting/">http://rikkertkoppes.github.io/experiments/2.Counting/</a></p>
 
 <p>Created two implementation. One functional, based around function composition (<code>count.ts</code>). The other is a rule based system based on regular expression string replacement (<code>rules.ts</code>).</p>
 
@@ -282,30 +284,28 @@ div(1,4,3,T)    //4th rule
 3               //3rd rule
 </code></pre>
 
-<h2>Notes (rules.ts)</h2>
+<h2>Improvements</h2>
+
+<p>Some ideas for improvements:</p>
 
 <ul>
-<li>0 is treated as a special case, decrementing it leads to NaN since we are only working with positive integer math here</li>
-<li>we may write the math rules directely in the normal format</li>
-</ul>
-
-<p>once operations are done a few times, a new rule can be learned that would skip the calculation
+<li>we may write the math rules directely in the normal format (<code>1+2</code> instead of <code>add(1,2)</code>)</li>
+<li><p>once operations are done a few times, a new rule can be learned that would skip the calculation
 like</p>
 
 <pre><code>mult(4,8) =&gt; 32
 </code></pre>
 
-<p>This would still allow all calculations, but speed up "known" calculations.</p>
+<p>This would still allow all calculations, but speed up "known" calculations.</p></li>
+<li><p>Multiplication rules can be simpler, especially for large numbers (long multiplication)</p></li>
+<li>Same for division (long division)</li>
+</ul>
 
-<p>Note that rules need to have an order here</p>
+<h2>Rules to RDF triples</h2>
 
-<p>Also, the predicates (=&gt;) is just one example here. Rules need not be bound to only this predicate</p>
+<p>Rules can be generalized to RDF triples, in which the predicate can have a particular rdf:domain, e.g. integer math.</p>
 
 <p>The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.</p>
-
-<h2>Better rules</h2>
-
-<p>Multiplication rules can be simpler, especially for large numbers</p>
 
 </body>
 </html>
