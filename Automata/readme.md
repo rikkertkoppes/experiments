@@ -13,7 +13,49 @@ So suppose we can let data flow into the CA, and we can set it up to distribute 
 
 Also, can't we use a single texture on a mesh of triangles and thus still benefiting from passing in attributes to the vertexes?
 
-How can data flow back from the fragment shader to the vertex shader (and back to attributes)? I guess it cannot. We may be able to get the texture buffer and read out specific locations though. That might not be too costly. Every step would update the texture to a new state (check ibex for that)
+How can data flow back from the fragment shader to the vertex shader (and back to attributes)? I guess it cannot. We may be able to get the texture buffer and read out specific locations though. That might not be costly (http://nullprogram.com/blog/2014/06/22/ - glReadPixels is costly). Every step would update the texture to a new state (check ibex for that)
+
+automata.ts
+---------
+
+created a simple CA, based on game of life implementation
+todo:
+
+- encode rules in the 'gba' values (do we only need totalistic automata?)
+- separate the step and draw cycles
+
+how can we encode elementary ca in a 2D ca?
+
+- elementary 1D = 2^2^3 = 256 rules
+- elementary 2D = 2^2^8 = 1.15 e77 rules (quite a lot) ~ so we can realistically only encode totalistic 2D rules
+
+Read more on other buffers than just the color buffer: http://www.glprogramming.com/red/chapter10.html
+-> webgl does support depth and stencil buffers
+
+nullprogram reports 18000 fps, while I can't seem to get any higher than about 200 (chrome) or 250 (firefox). Something's odd here. Is it just the gpu?
+
+In a hidden markov model, n layers, between layers m and n, with a_m and a_n nodes, we have a_m * a_n connections. If a_m = a_n = a, we need a cube of n*a*a connection stengths. Also, we need size and variance parameters, so n*a*a * 3 bytes or so. This is a a*a movie of n frames. The "brain" movie.
+
+Game of life
+-------
+
+There are lots of possible game of life rules: http://fano.ics.uci.edu/ca/rules/
+
+These can be encoded as two 9bits configurations.
+- Birth on 0,1,2,3,4,5,6,7,8 neigbhors
+- Survive on 0,1,2,3,4,5,6,7,8 neighbors
+
+The original game of life is B3/S23 (http://fano.ics.uci.edu/ca/rules/list.html). Which is
+      012345678
+    B 000100000     //32
+    S 001100000     //96
+
+The rules can hence be compacted in 18bits total, which can be encoded in the GBA channels of a texture
+This way we can also create zones in the world that have a different set of rules
+
+Create a page that takes a rulestring as query parameters. Then set up the texture accordingly. Create a generic shader that can handle any rule string
+
+Add controls to manipulate the rule string and poke the world. Maybe also draw in the world with a rule string brush
 
 Notes
 ----------
