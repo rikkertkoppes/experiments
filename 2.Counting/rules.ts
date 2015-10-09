@@ -42,7 +42,7 @@ decimalCounting.unshift(rule(/inc\((\d*)8\)/, '$19'));
 decimalCounting.unshift(rule(/inc\((\d*)9\)/, 'inc($1)0'));
 
 //previous
-decimalCounting.unshift(rule(/prev\(0\)/, 'NaN'));
+decimalCounting.unshift(rule(/dec\(0\)/, 'NaN'));
 decimalCounting.unshift(rule(/dec\((\d+)0\)/, 'dec($1)9'));
 decimalCounting.unshift(rule(/dec\((\d*)1\)/, '$10'));
 decimalCounting.unshift(rule(/dec\((\d*)2\)/, '$11'));
