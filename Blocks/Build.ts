@@ -194,6 +194,7 @@ interface visNode {
 interface visEdge {
     from: number;
     to: number;
+    label: string;
 }
 
 class Network {
@@ -232,12 +233,34 @@ class Network {
             label: path.getAttribute('class')
         }
     }
-    update(canvas) {
+    update(canvas:Canvas) {
         var nodes = canvas.paths.map(this.getNode);
         var edges = canvas.paths.reduce((all, path, i) => {
             return all.concat(this.getRelations(path, i));
         },[]);
         this.net.setData({ nodes: nodes, edges: edges });
+
+        this.classify(nodes, edges);
+    }
+    classify(nodes:visNode[],edges:visEdge[]) {
+        var input = Graph.create(function(graph) {
+            var blocks = nodes.map(function(node) {
+                return graph.block(Shape[node.label.toUpperCase()], 'red');
+            });
+            edges.forEach(function(edge) {
+                graph.edge(blocks[edge.from], blocks[edge.to], Relation[edge.label.toUpperCase()]);
+            });
+        });
+        var res = classify(brain, input).map(function(result) {
+            return [
+                '<tr><td>',
+                result.label,
+                '</td><td>',
+                result.grade,
+                '</td></tr>'
+            ].join('');
+        }).join('');
+        document.getElementById('result').innerHTML = '<table>' + res + '</table>';
     }
 }
 

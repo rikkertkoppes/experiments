@@ -200,6 +200,27 @@ var Network = (function () {
             return all.concat(_this.getRelations(path, i));
         }, []);
         this.net.setData({ nodes: nodes, edges: edges });
+        this.classify(nodes, edges);
+    };
+    Network.prototype.classify = function (nodes, edges) {
+        var input = Graph.create(function (graph) {
+            var blocks = nodes.map(function (node) {
+                return graph.block(Shape[node.label.toUpperCase()], 'red');
+            });
+            edges.forEach(function (edge) {
+                graph.edge(blocks[edge.from], blocks[edge.to], Relation[edge.label.toUpperCase()]);
+            });
+        });
+        var res = classify(brain, input).map(function (result) {
+            return [
+                '<tr><td>',
+                result.label,
+                '</td><td>',
+                result.grade,
+                '</td></tr>'
+            ].join('');
+        }).join('');
+        document.getElementById('result').innerHTML = '<table>' + res + '</table>';
     };
     return Network;
 })();

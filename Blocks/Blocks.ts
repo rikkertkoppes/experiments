@@ -1,12 +1,18 @@
 enum Shape {
     VRECT,
     HRECT,
-    CIRCLE,
-    TRIANGLE
+    HPLATE,
+    VPLATE,
+    SSQUARE,
+    LSQUARE,
+    ARC,
+    CYLINDER,
+    STRIANGLE,
+    LTRIANGLE
 }
 
 enum Relation {
-    TOUCH,
+    TOUCHES,
     NOTOUCH,
     SUPPORTS,
     ONTOPOF,
@@ -108,6 +114,7 @@ function distance<T>(arr1: T[], arr2: T[], compare = compareSame): number {
 }
 
 //graph edit distance based on levenshtein distance of verices and edges
+//TODO: sort vertices and edges first
 function GED(g1: Graph, g2: Graph): number {
     var dv = distance(g1.vertices, g2.vertices, compareVertex);
     var de = distance(g1.edges, g2.edges, compareEdge);
@@ -116,18 +123,18 @@ function GED(g1: Graph, g2: Graph): number {
 }
 
 var case1 = Graph.create(function(graph) {
-    var rect1 = graph.block(Shape.VRECT, 'red');
-    var rect2 = graph.block(Shape.VRECT, 'red');
-    var rect3 = graph.block(Shape.HRECT, 'red');
+    var rect1 = graph.block(Shape.VPLATE, 'red');
+    var rect2 = graph.block(Shape.VPLATE, 'red');
+    var rect3 = graph.block(Shape.HPLATE, 'red');
 
     graph.edge(rect1, rect3, Relation.SUPPORTS);
     graph.edge(rect2, rect3, Relation.SUPPORTS);
 });
 
 var case2 = Graph.create(function(graph) {
-    var rect1 = graph.block(Shape.VRECT, 'red');
-    var rect2 = graph.block(Shape.VRECT, 'red');
-    var rect3 = graph.block(Shape.HRECT, 'red');
+    var rect1 = graph.block(Shape.VPLATE, 'red');
+    var rect2 = graph.block(Shape.VPLATE, 'red');
+    var rect3 = graph.block(Shape.HPLATE, 'red');
 
     graph.edge(rect1, rect3, Relation.SUPPORTS);
     graph.edge(rect2, rect3, Relation.SUPPORTS);
@@ -135,25 +142,25 @@ var case2 = Graph.create(function(graph) {
 });
 
 var case2a = Graph.create(function(graph) {
-    var rect1 = graph.block(Shape.VRECT, 'red');
-    var rect2 = graph.block(Shape.VRECT, 'red');
-    var rect3 = graph.block(Shape.HRECT, 'red');
+    var rect1 = graph.block(Shape.VPLATE, 'red');
+    var rect2 = graph.block(Shape.VPLATE, 'red');
+    var rect3 = graph.block(Shape.HPLATE, 'red');
 
     graph.edge(rect1, rect3, Relation.SUPPORTS);
     graph.edge(rect2, rect3, Relation.SUPPORTS);
-    graph.edge(rect1, rect2, Relation.TOUCH);
+    graph.edge(rect1, rect2, Relation.TOUCHES);
 });
 
 var case3 = Graph.create(function(graph) {
-    var rect1 = graph.block(Shape.VRECT, 'red');
-    var rect2 = graph.block(Shape.VRECT, 'red');
-    var rect3 = graph.block(Shape.HRECT, 'red');
+    var rect1 = graph.block(Shape.VPLATE, 'red');
+    var rect2 = graph.block(Shape.VPLATE, 'red');
+    var rect3 = graph.block(Shape.HPLATE, 'red');
 });
 
 var input = Graph.create(function(graph) {
-    var rect1 = graph.block(Shape.VRECT, 'red');
-    var rect2 = graph.block(Shape.VRECT, 'red');
-    var rect3 = graph.block(Shape.TRIANGLE, 'red');
+    var rect1 = graph.block(Shape.VPLATE, 'red');
+    var rect2 = graph.block(Shape.VPLATE, 'red');
+    var rect3 = graph.block(Shape.LTRIANGLE, 'red');
 
     graph.edge(rect1, rect3, Relation.SUPPORTS);
     graph.edge(rect2, rect3, Relation.SUPPORTS);
@@ -200,8 +207,8 @@ function match(patterns: Graph[], input: Graph): Match[] {
 }
 
 //best of patterns
-console.log(bestMatch(patterns, input));
-console.log(match(patterns, input));
+// console.log(bestMatch(patterns, input));
+// console.log(match(patterns, input));
 
 interface Brain {
     [index: string]: Match[];
@@ -240,11 +247,11 @@ learn(brain, case2a, 'arch', false);
 learn(brain, case3, 'nothing', true);
 
 //we now have a set of weak classifiers for every label
-console.log(brain);
+// console.log(brain);
 
 
-var res = classify(brain, input);
-console.log(res);
+// var res = classify(brain, input);
+// console.log(res);
 
 //TODO
 //- work with boosting
