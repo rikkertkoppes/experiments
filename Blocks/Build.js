@@ -1,3 +1,4 @@
+/// <reference path='Blocks.ts'/>
 var SVGNS = 'http://www.w3.org/2000/svg';
 var MenuElement = (function () {
     function MenuElement(name, path) {
@@ -23,6 +24,7 @@ var MenuElement = (function () {
     MenuElement.prototype.renderPath = function () {
         var p = document.createElementNS(SVGNS, 'path');
         p.setAttribute('d', this.path);
+        p.setAttribute('transform', 'matrix(1 0 0 1 0 0)');
         return p;
     };
     return MenuElement;
@@ -43,7 +45,6 @@ var Menu = (function () {
         return this;
     };
     Menu.prototype.drawItem = function (item) {
-        console.log(arguments);
         this.canvas.drawItem(item);
     };
     return Menu;
@@ -59,34 +60,29 @@ var Canvas = (function () {
     }
     Canvas.prototype.drawItem = function (item) {
         var path = item.renderPath();
+        path.setAttribute('transform', 'matrix(1 0 0 1 1000 1000)');
         path.addEventListener('mousedown', this.startDrag.bind(this, path));
         this.g.appendChild(path);
         var bb = path.getBBox();
-        console.log(bb);
     };
     Canvas.prototype.getMousePoint = function (e) {
         var pt = this.svg.createSVGPoint();
         pt.x = e.pageX;
         pt.y = e.pageY;
-        console.log(pt, this.g.getScreenCTM());
         return pt.matrixTransform(this.g.getScreenCTM().inverse());
     };
     Canvas.prototype.startDrag = function (path, e) {
         this.dragPath = path;
         this.anchor = this.getMousePoint(e);
+        this.anchorMatrix = path.transform.baseVal[0].matrix;
         window.addEventListener('mousemove', this.dragHandler);
         window.addEventListener('mouseup', this.dragEndHandler);
-        console.log('start', this.anchor);
     };
     Canvas.prototype.drag = function (e) {
         var point = this.getMousePoint(e);
         var d = [point.x - this.anchor.x, point.y - this.anchor.y];
-        var t = this.dragPath.transform;
-        var m = this.dragPath.getCTM();
-        console.log(m);
-        this.dragPath.setAttribute('transform', 'translate(' + d.join(',') + ')');
-        // console.log(t);
-        console.log(d);
+        var m = this.anchorMatrix.translate.apply(this.anchorMatrix, d);
+        this.dragPath.setAttribute('transform', 'translate(' + m.e + ',' + m.f + ')');
     };
     Canvas.prototype.endDrag = function (e) {
         window.removeEventListener('mousemove', this.dragHandler);

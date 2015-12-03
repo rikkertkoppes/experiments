@@ -215,3 +215,4 @@ console.log(res);
 //- how does this work for logic? analogies? analogies are patterns right? It would be mostly the edges that match there. We need to drag in some associations (generalizations) before we can do a good match.
 // console.log(g1);
 // console.log(g2); 
+//# sourceMappingURL=Blocks.js.map
