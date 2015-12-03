@@ -99,8 +99,8 @@ var Canvas = (function () {
         var qlr = this.getEdges(query);
         var blr = this.getEdges(base);
         return ((query !== base) &&
-            ((qlr.bottom > blr.top) ||
-                (qlr.top < blr.bottom)) &&
+            (qlr.bottom > blr.top) &&
+            (qlr.top < blr.bottom) &&
             ((Math.abs(qlr.right - blr.left) < 50) ||
                 (Math.abs(qlr.left - blr.right) < 50)));
     };
