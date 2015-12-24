@@ -15,11 +15,11 @@ function isVariable(x) {
 }
 
 function unifyVar(v, x, bindings) {
-    if (bindings[v]) {
+    if (bindings[v] !== undefined) {
         //check if the stored thing unifies with x
         var res = unify([bindings[v]], [x]);
         return (res === false) ? res : extend(bindings, res);
-    } else if (isVariable(x) && bindings[x]) {
+    } else if (isVariable(x) && bindings[x] !== undefined) {
         //check if x is stored and the stored value unifies with var
         var res = unify([bindings[x]], [v]);
         return (res === false) ? res : extend(bindings, res);
@@ -76,19 +76,29 @@ function rule(head,c1,c2) {
 //perform a step
 function matchComplex(complex,brain,bindings) {
     var matchingRule = brain.filter(function(rule) {
-        return unify(rule.head,complex);
+        return unify(rule.head,complex,bindings);
     })[0];
+    // console.log(bindings,complex,matchingRule);
     if (matchingRule) {
-        var bindings = extend(bindings,unify(matchingRule.head,complex));
+        var bindings = unify(matchingRule.head,complex,bindings);
         if (matchingRule.body.length) {
-            return matchingRule.body.map(function(b) {
-                return substituteBindings(bindings,b);
-            });
+            return {
+                bindings: bindings,
+                rules: matchingRule.body.map(function(b) {
+                    return substituteBindings(bindings,b);
+                })
+            };
         } else {
-            return [substituteBindings(bindings,matchingRule.head)];
+            return {
+                bindings: bindings,
+                rules: [substituteBindings(bindings,matchingRule.head)]
+            };
         }
     } else {
-        return [complex];
+        return {
+            bindings: bindings,
+            rules: [complex]
+        };
     }
 }
 
@@ -97,8 +107,26 @@ function matchComplex(complex,brain,bindings) {
 function matchInput(input,brain) {
     //flatmap
     return input.reduce(function(all,complex) {
-        return all.concat(matchComplex(complex,brain,{}));
-    },[]);
+        var res = matchComplex(complex,brain,all.bindings);
+        return {
+            bindings: res.bindings,
+            rules: all.rules.concat(res.rules)
+        };
+    },{
+        bindings: {},
+        rules: []
+    });
+}
+
+function solve(input,brain) {
+    var first = matchInput(input,brain);
+    var last = matchInput(first.rules,brain);
+    while (JSON.stringify(first) !== JSON.stringify(last)) {
+        console.log(first);
+        first = last;
+        last = matchInput(last.rules,brain);
+    };
+    return last;
 }
 
 module.exports = {
@@ -108,5 +136,6 @@ module.exports = {
     unifier: unifier,
     complex: complex,
     rule: rule,
-    matchInput: matchInput
+    matchInput: matchInput,
+    solve: solve
 }

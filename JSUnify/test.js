@@ -32,6 +32,9 @@ describe('unify', function() {
     it('should fail when it cannot be unified', function() {
         expect(unify.unify(['X', 'X'], [1, 2])).to.be(false);
     });
+    it('should fail when attempting to unify twice', function() {
+        expect(unify.unify(['B'], [1],{B: 0})).to.be(false);
+    });
 });
 
 describe('unifier',function() {
@@ -51,6 +54,7 @@ var brain = [
     unify.rule(unify.complex('inc',[4,5])),
     unify.rule(unify.complex('dec',[2,1])),
     unify.rule(unify.complex('dec',[1,0])),
+    unify.rule(unify.complex('goal',['G'])),
     //addition rules
     unify.rule(unify.complex('add',['X',0,'X'])),
     unify.rule(unify.complex('add',['X','Y','Z']),
@@ -88,10 +92,24 @@ describe('rule',function() {
 describe('matchInput',function() {
     it('should apply rules to the input',function() {
         // input = [complex('inc',[3,'A'])];
-        console.log(input);
-        var res1 = unify.matchInput(input,brain);
-        console.log(res1);
-        var res2 = unify.matchInput(res1,brain);
-        console.log(res2);
+        // console.log(input);
+        // var res1 = unify.matchInput(input,brain);
+        // console.log(res1);
+        // var res2 = unify.matchInput(res1.rules,brain);
+        // console.log(res2);
+        // var res3 = unify.matchInput(res2.rules,brain);
+        // console.log(res3);
+        // var res4 = unify.matchInput(res3.rules,brain);
+        // console.log(res4);
+        // var res5 = unify.matchInput(res4.rules,brain);
+        // console.log(res5);
+        // var res6 = unify.matchInput(res5.rules,brain);
+        // console.log(res6);
+
+        //TODO: bind the goal
+        //TODO: work with fresh variables internally, to prevent crossover
+        //TODO: get back the variables from the input as bindings, all the rest is irrelevant
+        res = unify.solve(input,brain);
+        console.log(res);
     });
 });
