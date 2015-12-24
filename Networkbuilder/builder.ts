@@ -1,9 +1,9 @@
+/// <reference path='Cytoscape.d.ts'/>
 
 declare var ace: any;
 declare var jsonld: any;
-declare var cytoscape: any;
 
-var cy;
+var cy: Cytoscape.Instance;
 
 var editor = ace.edit("editor");
 editor.getSession().setMode("ace/mode/javascript");
@@ -17,6 +17,7 @@ function getLocal(IRI) {
     return IRI.split(/\W/g).pop();
 }
 
+//only unique values. Based on hasher function, which defaults to JSON stringify
 class Set<T> {
     store = {};
     hasher: (obj: T) => string;
@@ -52,8 +53,8 @@ function getShape(node) {
 }
 
 function render(quads) {
-    var nodes = new Set();
-    var edges = new Set();
+    var nodes = new Set<Cytoscape.NodeLiteral>();
+    var edges = new Set<Cytoscape.EdgeLiteral>();
 
     quads.forEach(function(quad) {
         var subId = ''+quad.subject.value;
@@ -82,6 +83,10 @@ function render(quads) {
                 shape: getShape(quad.object)
             }
         });
+        //TODO: cluster nodes by source and predicate
+        //if same source and same predicate, remove all the edges
+        //add parent node (type collection) with predicate
+        //add child nodes
         edges.push({
             group: 'edges',
             data: {
@@ -95,6 +100,33 @@ function render(quads) {
         });
     })
 
+    // // var edgeIndex = {};
+    // var edgesIndex = edges.values().reduce(function(edgesIndex, edge) {
+    //     var key = edge.data.source + edge.data.title;
+    //     if (edgesIndex[key]) {
+    //         //edge already there
+    //         if (edgesIndex[key] instanceof Array) {
+    //             //collection already there
+    //             edgesIndex[key].push(edge);
+    //         } else {
+    //             //no collection, create parent node
+    //             var parent = {
+    //                 group: 'nodes',
+    //                 data: {
+    //                     id: 'n'+nodes.length(),
+    //                     label: edge.data.label,
+    //                     title: edge.data.title,
+    //                     color: 'green'
+    //                 }
+    //             }
+    //             nodes.push(parent);
+    //         }
+    //     } else {
+    //         edgesIndex[key] = edge;
+    //     }
+    //     return edges;
+    // },{});
+
     var elements = [].concat(nodes.values(), edges.values());
     console.log(elements);
     cy = cytoscape({
@@ -102,15 +134,25 @@ function render(quads) {
         // boxSelectionEnabled: false,
         autounselectify: true,
         elements: elements,
+        motionBlur: true,
+        wheelSensitivity: 0.5,
         style: [
             {
                 selector: 'node',
                 css: {
+                    'shape': 'roundrectangle',
                     'content': 'data(label)',
                     'text-valign': 'center',
                     'text-halign': 'center',
                     'width': 'label',
-                    'height':'label'
+                    'height':'label',
+                    'padding-top': '4px',
+                    'padding-left': '4px',
+                    'padding-bottom': '4px',
+                    'padding-right': '4px',
+                    'border-width': '2',
+                    'border-color': 'black',
+                    'background-color': 'white'
                 }
             },
             {
@@ -120,9 +162,9 @@ function render(quads) {
                     'padding-left': '10px',
                     'padding-bottom': '10px',
                     'padding-right': '10px',
-                    'text-valign': 'top',
-                    'text-halign': 'center',
-                    'background-color': '#bbb'
+                    'text-valign': 'bottom',
+                    // 'text-halign': 'center',
+                    // 'background-color': '#bbb'
                 }
             },
             {

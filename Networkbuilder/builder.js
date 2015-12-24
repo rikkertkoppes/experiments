@@ -1,3 +1,4 @@
+/// <reference path='Cytoscape.d.ts'/>
 var cy;
 var editor = ace.edit("editor");
 editor.getSession().setMode("ace/mode/javascript");
