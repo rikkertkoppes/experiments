@@ -30,7 +30,7 @@ function unifyVar(v, x, bindings) {
     return bindings;
 }
 
-function unify(a, b) {
+function unify(a, b, bindings) {
     if (a.length !== b.length) return false;
     return a.reduce(function(bindings, x, i) {
         var y = b[i];
@@ -44,40 +44,69 @@ function unify(a, b) {
             return unifyVar(y, x, bindings);
         }
         return false;
-    }, {});
+    }, bindings || {});
 }
 
-var expect = require('expect.js');
+function substituteBindings(bindings,a) {
+    if (bindings === false) return false;
+    return a.map(function(x) {
+        if (isVariable(x) && bindings[x]) return bindings[x];
+        return x;
+    });
+}
 
-describe('extend', function() {
-    it('should join objects', function() {
-        expect(extend({a: 2,d: 2}, {b: 3,c: 4}, {d: 5,e: 6})).to.eql({a: 2,b: 3,c: 4,d: 5,e: 6});
-    })
-});
+function unifier(x,y) {
+    return substituteBindings(unify(x,y),x);
+}
 
-describe('isVariable', function() {
-    it('should be a var when the first letter is a capital', function() {
-        expect(isVariable('Xsd')).to.be(true);
-        expect(isVariable('ssd')).to.be(false);
-        expect(isVariable(1)).to.be(false);
-    })
-})
 
-describe('unify', function() {
-    it('should fail lists of different lengths', function() {
-        expect(unify([], [1])).to.be(false);
-    });
-    it('should unify a var with a number', function() {
-        expect(unify(['X'], [1])).to.eql({X: 1});
-    });
-    it('should unify a var with another var', function() {
-        expect(unify(['X'], ['Y'])).to.eql({X: 'Y'});
-    });
-    it('should unify two vars with numbers', function() {
-        expect(unify(['X', 'Y'], [1, 2])).to.eql({X: 1,Y: 2});
-        expect(unify(['X', 2], [1, 'Y'])).to.eql({X: 1,Y: 2});
-    });
-    it('should fail when it cannot be unified', function() {
-        expect(unify(['X', 'X'], [1, 2])).to.eql({});
-    });
-});
+
+function complex(predicate,assocs) {
+    return [predicate].concat(assocs);
+}
+
+//defines a rule by a head expression and optional body expressions (if none then fact)
+function rule(head,c1,c2) {
+    return {
+        head: head,
+        body: [].slice.call(arguments,1)
+    }
+}
+
+//perform a step
+function matchComplex(complex,brain,bindings) {
+    var matchingRule = brain.filter(function(rule) {
+        return unify(rule.head,complex);
+    })[0];
+    if (matchingRule) {
+        var bindings = extend(bindings,unify(matchingRule.head,complex));
+        if (matchingRule.body.length) {
+            return matchingRule.body.map(function(b) {
+                return substituteBindings(bindings,b);
+            });
+        } else {
+            return [substituteBindings(bindings,matchingRule.head)];
+        }
+    } else {
+        return [complex];
+    }
+}
+
+//TODO: consider the input (array of complex) as a whole, that is,
+//consider them to have a shared scope / set of bindings
+function matchInput(input,brain) {
+    //flatmap
+    return input.reduce(function(all,complex) {
+        return all.concat(matchComplex(complex,brain,{}));
+    },[]);
+}
+
+module.exports = {
+    extend: extend,
+    isVariable: isVariable,
+    unify: unify,
+    unifier: unifier,
+    complex: complex,
+    rule: rule,
+    matchInput: matchInput
+}
