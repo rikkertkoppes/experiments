@@ -27,8 +27,13 @@ export class Spirit {
     }
     //get active nodes and its linked nodes, and update them
     cycle() {
-        return this.query('MATCH (s)-[r]->(o) WHERE s.activity > 0 RETURN s,r,o')
-            .then(this.update);
+        return this.db.queryAsync([
+            { statement: 'match(c:Context {value: "_:b4" }), (o) - [r {context: c.value }] ->(s) return s' },
+            { statement: 'match(s) where s.activity > 0 set s.newActivity = s.activity / (size(()-- > (s)) + 1) return s' },
+            { statement: 'match (s)-[r]->(o) where s.activity > 0 set o.newActivity = o.newActivity + s.activity/(size(()-->(o))+1) return s,r,o' },
+            { statement: 'match (s) set s.activity = s.newActivity return s' },
+            { statement: 'match(s) where s.activity > 0 return s' }
+        ]);
     }
 }
 

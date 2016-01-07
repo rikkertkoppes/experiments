@@ -144,18 +144,18 @@ var expr4 = new Expression('Add', 'A', 'B', 'Z');
 
 var spirit = new activity.Spirit(db);
 
-// spirit.cycle().then(function(res) {
-//     console.log(JSON.stringify(res, null, 2));
-// })
+spirit.cycle().then(function(res) {
+    console.log(JSON.stringify(res, null, 2));
+})
 
 
-series([
-    function() { return expr1.save(); },
-    function() { return expr2.save(); },
-    function() { return expr3.save(); },
-    function() { return expr4.save(); }
-]).then(function() {
-    return db.queryAsync('MATCH (n) RETURN n');
-}).then(function(results) {
-    console.log(JSON.stringify(results, null, 4));
-});
+// series([
+//     function() { return expr1.save(); },
+//     function() { return expr2.save(); },
+//     function() { return expr3.save(); },
+//     function() { return expr4.save(); }
+// ]).then(function() {
+//     return db.queryAsync('MATCH (n) RETURN n');
+// }).then(function(results) {
+//     console.log(JSON.stringify(results, null, 4));
+// });
