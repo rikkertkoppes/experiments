@@ -34,3 +34,12 @@ export class Spirit {
 
 //get a context (a graph) and its content:
 //match (c:Context {value:"_:b4"}), (o)-[r {context:c.value}]->(s) return c,r
+//
+//first, for all active nodes, reduce activity and copy to new activity (scaled by number of parent)
+//match (s) where s.activity > 0 set s.newActivity = s.activity/(size(()-->(s))+1) return s
+//
+//then, flow the activity to children
+//match (s)-[r]->(o) where s.activity > 0 set o.newActivity = o.newActivity + s.activity/(size(()-->(o))+1) return s,r,o
+//
+//finally, update the activity itself to the newly calculated value
+//match (s) set s.activity = s.newActivity return s
