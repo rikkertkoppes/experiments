@@ -23,8 +23,8 @@ Maybe get some inspiration from Norvig's language example (treat rules as data)
 
 - First create a list of symbols
 
-        `(a x ^ 2 + b x + 13)
-        `(10 - 5 + 3)
+        [a x ^ 2 + b x + 13]
+        [10 - 5 + 3]
 
     with proper parsing, numbers are immediately clustered
 

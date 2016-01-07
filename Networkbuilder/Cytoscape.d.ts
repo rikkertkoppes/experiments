@@ -17,8 +17,21 @@ declare module Cytoscape {
         group: string;
         data: any;
     }
-    export interface Instance {
 
+    export interface ElementCollection {
+        //manipulation
+        remove(): ElementCollection;
+        restore();
+        clone(): ElementCollection;
+        copy(): ElementCollection;
+        move(location: any);
+        //events
+    }
+
+    export interface Instance {
+        add(eleObj: (NodeLiteral|EdgeLiteral));
+        add(eleObjs: (NodeLiteral|EdgeLiteral)[]);
+        add(eles: ElementCollection);
     }
     interface Static {
         (config: Config): Instance;

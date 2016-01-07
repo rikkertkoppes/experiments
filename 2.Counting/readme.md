@@ -241,5 +241,3 @@ Rules to RDF triples
 Rules can be generalized to RDF triples, in which the predicate can have a particular rdf:domain, e.g. integer math.
 
 The predicate may be "activated" by recognizing we are doing positive integer math. If we are doing Complex math, a pattern recognizer may see that and disable the whole group of predicates.
-
-

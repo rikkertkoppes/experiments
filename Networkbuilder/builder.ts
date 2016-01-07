@@ -20,19 +20,37 @@ function getLocal(IRI) {
 //only unique values. Based on hasher function, which defaults to JSON stringify
 class Set<T> {
     store = {};
-    hasher: (obj: T) => string;
-    constructor(hasher = obj => JSON.stringify(obj)) {
-        this.hasher = hasher;
+    hash: (obj: T) => string;
+    constructor(hash = obj => JSON.stringify(obj)) {
+        this.hash = hash;
     };
     push(value: T):Set<T> {
-        this.store[this.hasher(value)] = value;
+        this.store[this.hash(value)] = value;
         return this;
+    }
+    has(value: T): boolean {
+        return !!this.store[this.hash(value)];
+    }
+    get(hash: string) {
+        return this.store[hash];
     }
     length(): number {
         return Object.keys(this.store).length;
     }
     values():T[] {
         return Object.keys(this.store).map(key => this.store[key]);
+    }
+}
+
+//set where every entry is an array, groups "same" items
+class GroupSet<T> extends Set<T> {
+    push(value: T): Set<T> {
+        if (this.has(value)) {
+            this.store[this.hash(value)].push(value);
+        } else {
+            this.store[this.hash(value)] = [value];
+        }
+        return this;
     }
 }
 
@@ -56,8 +74,21 @@ function render(quads) {
     var nodes = new Set<Cytoscape.NodeLiteral>();
     var edges = new Set<Cytoscape.EdgeLiteral>();
 
-    quads.forEach(function(quad) {
+    //build up a GroupSet, grouping objects with the same subject and predicate together
+    var quadIndex = quads.reduce(function(set, quad) {
+        return set.push(quad);
+    },new GroupSet(function(quad) {
+        return quad.subject.value + ' -> ' + quad.predicate.value;
+    }));
+
+    console.log(quadIndex);
+
+    quadIndex.values().forEach(function(quads) {
+        //create the subject node
+        var quad = quads[0];
         var subId = ''+quad.subject.value;
+        var groupId = null;
+        var objId = null;
         nodes.push({
             group:'nodes',
             data: {
@@ -70,18 +101,32 @@ function render(quads) {
                 shape: getShape(quad.subject)
             }
         });
-        var objId = (['IRI', 'blank node'].indexOf(quad.object.type) !== -1) ? ''+quad.object.value : 'n'+nodes.length();
-        nodes.push({
-            group: 'nodes',
-            data: {
-                id: objId,
-                parent: quad.graph.value,
-                // label: getLocal(quad.object.value),
-                label: quad.object.value,
-                title: quad.object.value,
-                color: getColor(quad.object),
-                shape: getShape(quad.object)
-            }
+        //create a group of objects if there are more
+        if (quads.length > 1) {
+            groupId = nodes.length();
+            nodes.push({
+                group: 'nodes',
+                data: {
+                    id: groupId,
+                    parent: quad.graph.value,
+                    label: quad.predicate.value
+                }
+            });
+        }
+        quads.forEach(function(quad) {
+            objId = (['IRI', 'blank node'].indexOf(quad.object.type) !== -1) ? '' + quad.object.value : 'n' + nodes.length();
+            nodes.push({
+                group: 'nodes',
+                data: {
+                    id: objId,
+                    parent: groupId || quad.graph.value,
+                    // label: getLocal(quad.object.value),
+                    label: quad.object.value,
+                    title: quad.object.value,
+                    color: getColor(quad.object),
+                    shape: getShape(quad.object)
+                }
+            });
         });
         //TODO: cluster nodes by source and predicate
         //if same source and same predicate, remove all the edges
@@ -93,7 +138,7 @@ function render(quads) {
                 id: 'e'+edges.length(),
                 parent: quad.graph.value,
                 source: subId,
-                target: objId,
+                target: groupId || objId,
                 label: getLocal(quad.predicate.value),
                 title: quad.predicate.value,
             }
