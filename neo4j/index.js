@@ -1,12 +1,14 @@
-var __extends = (this && this.__extends) || function (d, b) {
+var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    __.prototype = b.prototype;
+    d.prototype = new __();
 };
 var Neo4j = require('rainbird-neo4j');
 var config = require('./config.json');
 var Promise = require('bluebird');
 var db = new Neo4j('http://localhost:7474', config.username, config.password);
+var activity = require('./activity');
 Promise.promisifyAll(db);
 function merge() {
     var objs = [];
@@ -21,8 +23,8 @@ function merge() {
     }, {});
 }
 var RDFNode = (function () {
-    function RDFNode(types, properties) {
-        this.types = [].concat(types);
+    function RDFNode(labels, properties) {
+        this.labels = [].concat(labels);
         this.properties = properties;
     }
     RDFNode.prototype.toNeoProps = function () {
@@ -40,45 +42,42 @@ var RDFNode = (function () {
         return '{' + list + '}';
     };
     RDFNode.prototype.toNode = function (varName) {
-        return '(' + varName + ':' + this.types.join(':') + ' ' + this.toNeoProps(this.properties) + ')';
+        return '(' + varName + ':' + this.labels.join(':') + ' ' + this.toNeoProps(this.properties) + ')';
     };
     RDFNode.prototype.toRelation = function (context) {
-        return '[:' + this.types.join(':') + ' ' + this.toNeoProps(this.properties, { context: context.properties.value }) + ']';
+        return '[:' + this.labels.join(':') + ' ' + this.toNeoProps(this.properties, { context: context.properties.id }) + ']';
     };
     return RDFNode;
 })();
 var Resource = (function (_super) {
     __extends(Resource, _super);
-    function Resource(ns, local) {
-        _super.call(this, 'IRI', {
-            value: ns + local,
+    function Resource(ns, local, props) {
+        if (props === void 0) { props = {}; }
+        _super.call(this, 'IRI', merge(props, {
+            id: ns + local,
             ns: ns,
-            local: local
-        });
+            local: local,
+            activity: 0,
+            newActivity: 0
+        }));
     }
     return Resource;
 })(RDFNode);
-var Literal = (function (_super) {
-    __extends(Literal, _super);
-    function Literal(value, type) {
-        _super.call(this, 'Literal', {
-            value: value,
-            type: type
-        });
-    }
-    return Literal;
-})(RDFNode);
 var Blank = (function (_super) {
     __extends(Blank, _super);
-    function Blank() {
-        _super.call(this, 'Blank', {
-            value: '_:b' + Blank.count++
-        });
+    function Blank(props) {
+        if (props === void 0) { props = {}; }
+        _super.call(this, 'Blank', merge(props, {
+            id: '_:b' + Blank.count++,
+            activity: 0,
+            newActivity: 0
+        }));
     }
     Blank.count = 0;
     return Blank;
 })(RDFNode);
 var MY_NS = 'http://www.example.com/';
+var MY_VAR = 'http://www.example.com/var/';
 var RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 var RDFS = 'http://www.w3.org/2000/01/rdf-schema#';
 var RDF_TYPE = new Resource(RDF, 'type');
@@ -115,12 +114,12 @@ var Expression = (function () {
             args[_i - 1] = arguments[_i];
         }
         var context = new Blank();
-        context.types.push('Context');
+        context.labels.push('Context');
         var pNode = new Blank();
         var ptypeNode = new Resource(MY_NS, predicate);
         var argRel = new Resource(MY_NS, 'argument');
         this.quads = [new Quad(pNode, RDF_TYPE, ptypeNode, context)].concat(args.map(function (arg) {
-            return new Quad(pNode, argRel, new Literal(arg), context);
+            return new Quad(pNode, argRel, new Resource(MY_VAR, arg), context);
         }));
     }
     Expression.prototype.mergeQuery = function () {
@@ -134,7 +133,7 @@ var Expression = (function () {
     ;
     return Expression;
 })();
-var q = new Quad(new Blank(), new Resource(MY_NS, 'argument'), new Literal('X'), new Blank());
+var q = new Quad(new Blank(), new Resource(MY_NS, 'argument'), new Blank({ value: 'X' }), new Blank());
 function series(promiseFns) {
     return promiseFns.reduce(function (sofar, fn) {
         return sofar.then(fn);
@@ -146,6 +145,10 @@ var expr2 = new Expression('Inc', 'X', 'A');
 var expr3 = new Expression('Dec', 'Y', 'B');
 var expr4 = new Expression('Add', 'A', 'B', 'Z');
 // expr.save();
+var spirit = new activity.Spirit(db);
+// spirit.cycle().then(function(res) {
+//     console.log(JSON.stringify(res, null, 2));
+// })
 series([
     function () { return expr1.save(); },
     function () { return expr2.save(); },

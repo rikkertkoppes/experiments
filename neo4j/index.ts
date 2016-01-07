@@ -3,6 +3,8 @@ var config = require('./config.json');
 var Promise = require('bluebird');
 var db = new Neo4j('http://localhost:7474', config.username, config.password);
 
+import activity = require('./activity');
+
 Promise.promisifyAll(db);
 
 function merge(...objs: Object[]):Object {
@@ -10,15 +12,15 @@ function merge(...objs: Object[]):Object {
         Object.keys(obj).forEach(function(key: string) {
             merged[key] = obj[key];
         });
-        return merged; 
+        return merged;
     }, {});
 }
 
 class RDFNode {
-    types: string[];
+    labels: string[];
     properties: Object;
-    constructor(types: string|string[], properties: Object) {
-        this.types = [].concat(types);
+    constructor(labels: string|string[], properties: Object) {
+        this.labels = [].concat(labels);
         this.properties = properties;
     }
     private toNeoProps(...objs: Object[]): string {
@@ -32,43 +34,39 @@ class RDFNode {
         return '{' + list + '}';
     }
     toNode(varName: string): string {
-        return '(' + varName + ':' + this.types.join(':') + ' ' + this.toNeoProps(this.properties) + ')';
+        return '(' + varName + ':' + this.labels.join(':') + ' ' + this.toNeoProps(this.properties) + ')';
     }
     toRelation(context?: Resource): string {
-        return '[:' + this.types.join(':') + ' ' + this.toNeoProps(this.properties, { context: context.properties.value }) + ']';
+        return '[:' + this.labels.join(':') + ' ' + this.toNeoProps(this.properties, { context: context.properties.id }) + ']';
     }
 }
 
 class Resource extends RDFNode {
-    constructor(ns, local) {
-        super('IRI', {
-            value: ns + local,
+    constructor(ns, local, props={}) {
+        super('IRI', merge(props, {
+            id: ns + local,
             ns: ns,
-            local: local
-        });
-    }
-}
-
-class Literal extends RDFNode {
-    constructor(value, type?) {
-        super('Literal', {
-            value: value,
-            type: type
+            local: local,
+            activity: 0,
+            newActivity: 0
         });
     }
 }
 
 class Blank extends RDFNode {
     static count: number = 0;
-    constructor() {
-        super('Blank', {
-            value: '_:b' + Blank.count++
-        });
+    constructor(props={}) {
+        super('Blank', merge(props,{
+            id: '_:b' + Blank.count++,
+            activity: 0,
+            newActivity: 0
+        }));
     }
 }
 
 
 const MY_NS = 'http://www.example.com/';
+const MY_VAR = 'http://www.example.com/var/';
 const RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 const RDFS = 'http://www.w3.org/2000/01/rdf-schema#';
 const RDF_TYPE = new Resource(RDF, 'type');
@@ -105,12 +103,12 @@ class Expression {
     quads: Quad[];
     constructor(predicate: string, ...args: string[]) {
         var context = new Blank();
-        context.types.push('Context');
+        context.labels.push('Context');
         var pNode = new Blank();
         var ptypeNode = new Resource(MY_NS, predicate);
         var argRel = new Resource(MY_NS, 'argument');
         this.quads = [new Quad(pNode, RDF_TYPE, ptypeNode, context)].concat(args.map(arg => {
-            return new Quad(pNode, argRel, new Literal(arg), context);
+            return new Quad(pNode, argRel, new Resource(MY_VAR,arg), context);
         }));
     }
     mergeQuery() {
@@ -125,7 +123,7 @@ class Expression {
 var q = new Quad(
     new Blank(),
     new Resource(MY_NS, 'argument'),
-    new Literal('X'),
+    new Blank({ value: 'X' }),
     new Blank()
 );
 
@@ -143,6 +141,13 @@ var expr2 = new Expression('Inc', 'X', 'A');
 var expr3 = new Expression('Dec', 'Y', 'B');
 var expr4 = new Expression('Add', 'A', 'B', 'Z');
 // expr.save();
+
+var spirit = new activity.Spirit(db);
+
+// spirit.cycle().then(function(res) {
+//     console.log(JSON.stringify(res, null, 2));
+// })
+
 
 series([
     function() { return expr1.save(); },
